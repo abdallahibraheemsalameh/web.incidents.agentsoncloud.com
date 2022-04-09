@@ -5,7 +5,6 @@ import Vue from "vue";
 import incident from "./modules/incident";
 import impactedIssue from "./modules/impactedIsssue";
 import attachment from "./modules/attachment";
-import responder from "./modules/responder";
 import comment from "./modules/comment";
 import creator from "./modules/creator";
 import activityLog from "./modules/activityLog";
@@ -16,7 +15,6 @@ export default () =>
       incident,
       impactedIssue,
       attachment,
-      responder,
       comment,
       creator,
       activityLog,

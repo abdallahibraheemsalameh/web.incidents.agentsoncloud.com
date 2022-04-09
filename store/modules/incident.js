@@ -7,10 +7,10 @@ const state = {
   incidentState: "",
   incidentHistory: [],
   updatedIncident: {},
+  user: {},
 };
 const getters = {
   allIncident(state) {
-    console.log("aaaaallllllllllllllllllllllllll");
     return state.incidents;
   },
   incidentHistory(state) {
@@ -34,10 +34,13 @@ const getters = {
   updatedIncident(state) {
     return state.updatedIncident;
   },
+  responderData(state) {
+    return state.user;
+  },
 };
 const actions = {
-  async getIncidentByAssigneeToMe({ commit }, id) {
-    console.log(id, "iiddddddddddd");
+  async getIncidentByAssigneeToMe({ commit }) {
+    const id = localStorage.getItem("userId");
     try {
       const incidents = await this.$axios.$get(
         `/incident-management/incident/assignee/${id}`
@@ -49,12 +52,10 @@ const actions = {
     }
   },
   async getAllIncidents({ commit }) {
-    console.log("@!@!!!!!!!!!!!!!!!!!!!!!");
     try {
       const getIncidents = await this.$axios.$get(
         `/incident-management/incident`
       );
-      console.log(getIncidents, "allllllllllllllllllllllllllllllllllincidents");
       commit("setIncidents", getIncidents);
     } catch (err) {
       console.log(err);
@@ -91,14 +92,20 @@ const actions = {
       console.log(err);
     }
   },
+  async getResponderById({ commit }, id) {
+    try {
+      const user = await this.$axios.$get(`/user-management/users/${id}`);
+      commit("getUser", user);
+    } catch (err) {
+      console.log(err);
+    }
+  },
   async deleteIncident({ commit }, id) {
     try {
       const incident = await this.$axios.$delete(
         `/incident-management/incident/${id}`
       );
-      // if (recordStatua === "isDeletes" && id === id) {
       commit("deleteIncident", id);
-      // }
     } catch (err) {
       console.log(err);
     }
@@ -161,6 +168,7 @@ const mutations = {
   setIncidentHistory: (state, incidentHistory) =>
     (state.incidentHistory = incidentHistory),
   changeIncident: (state, incident) => (state.updatedIncident = incident),
+  getUser: (state, user) => (state.user = user),
 };
 export default {
   state,

@@ -30,7 +30,6 @@ const actions = {
       const attachments = await this.$axios.$get(
         `/incident-management/attachment/${incidentId}`
       );
-      console.log(attachments, "hiiiaiaiawwwwwwwwwwwwwwwwiaiai");
       commit("allAttachments", attachments);
     } catch (err) {
       console.log(err);

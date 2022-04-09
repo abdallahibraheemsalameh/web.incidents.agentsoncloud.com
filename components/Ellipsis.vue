@@ -1,13 +1,12 @@
 <template #[`item.icon`]="">
   <div class="text-center">
-    <!-- <h2>{{ creatorIdProps }}</h2> -->
     <v-menu top :offset-x="offset">
       <template v-slot:activator="{ on, attrs }">
         <v-icon v-bind="attrs" v-on="on">mdi-dots-vertical </v-icon>
       </template>
 
       <!-- Creator -->
-      <v-list class="list" v-if="creatorIdProps === Number(creatorId)">
+      <v-list class="list" v-if="creatorIdProps === Number(userId)">
         <v-list-item>
           <v-list-item-title
             ><div @click.stop="showCreateForm = true">
@@ -40,13 +39,13 @@
         <v-list-item>
           <v-list-item-title>update escalation duration</v-list-item-title>
         </v-list-item>
-        <v-list-item @change="onHold" @click="$emit('edit')">
+        <v-list-item @change="stateValue('On Hold')">
           <v-list-item-title>On hold</v-list-item-title>
         </v-list-item>
-        <v-list-item @change="resolved">
+        <v-list-item @change="stateValue('Resolved (corrective)')">
           <v-list-item-title>Resolved (corrective)</v-list-item-title>
         </v-list-item>
-        <v-list-item @change="closed">
+        <v-list-item @change="stateValue('Closed (preventive)')">
           <v-list-item-title>Closed (preventive)</v-list-item-title>
         </v-list-item>
       </v-list>
@@ -57,7 +56,6 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import updateIncident from "../pages/updateIncident.vue";
-console.log("-----------------------------------------elepsape");
 export default {
   components: { updateIncident },
   props: ["creatorIdProps", "incidentIdProps", "itemProps"],
@@ -67,8 +65,7 @@ export default {
       offset: true,
       recordStatua: "",
       dialog: false,
-      creatorId: 0,
-      items: ["new", "onHold"],
+      userId: 0,
       userId: localStorage.getItem("userId"),
       showCreateForm: false,
     };
@@ -77,10 +74,17 @@ export default {
     ...mapGetters(["allIncident", "incidentState", "allIncidentsAssigneeToMe"]),
   },
   async mounted() {
-    this.creatorId = localStorage.getItem("userId");
+    this.userId = localStorage.getItem("userId");
     await this.updateIncidentState({ id: this.itemProps.id });
   },
   methods: {
+    async stateValue(value) {
+      await this.updateIncidentState({
+        id: this.itemProps.id,
+        state: value,
+      });
+      this.$emit("getIncidents");
+    },
     ...mapActions([
       "incidentUpdated",
       "deleteIncident",
@@ -91,31 +95,10 @@ export default {
     deleteIncidentFun() {
       this.deleteIncident(this.itemProps.id);
     },
+
     addComment() {
       this.$router.push(`/incidentDetails?incidentId=${this.incidentIdProps}`);
       console.log(this.itemProps, "cooooooo");
-    },
-    async onHold() {
-      await this.updateIncidentState({
-        id: this.itemProps.id,
-        state: "On Hold",
-      });
-    },
-    resolved() {
-      this.updateIncidentState({
-        id: this.itemProps.id,
-        state: "Resolved (corrective)",
-      });
-      this.$router.push("/allIncidents");
-    },
-    closed() {
-      this.updateIncidentState({
-        id: this.itemProps.id,
-        state: "Closed (preventive)",
-      });
-    },
-    updateEscalationDuration() {
-      // this.itemProps.escalationPolicy = "";
     },
   },
 };

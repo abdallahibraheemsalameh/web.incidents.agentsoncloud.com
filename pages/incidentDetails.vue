@@ -29,12 +29,15 @@
           single-expand
           item-key="id"
         >
-          <template v-slot:[`item.responderId`]="{ item }">
-            <div v-for="responder in responders" :key="responder.id">
-              <div v-if="item.id == responder.id">
-                {{ responder.responderName }}
-              </div>
-            </div>
+          <template v-slot:[`item.responderId`]>
+            {{ responderData.name }}
+          </template>
+          <template v-slot:[`item.escalationPolicy`]="{ item }">
+            Update each
+            {{
+              item.escalationPolicy ? item.escalationPolicy.split(":")[1] : ""
+            }}
+            m
           </template>
           <template v-slot:[`item.creatorId`]>
             {{ creator.name }}
@@ -95,23 +98,52 @@
               <v-img
                 v-bind:src="'../assets/uploads/' + attachment.attachment"
               ></v-img>
+              image
+              <!-- <v-img
+                src="../assets/uploads/"
+              ></v-img> -->
             </div>
           </div>
         </div>
-        <!-- ///////// -->
+
         <div class="rightDetails">
           <div class="activity">
             <div>Activity:</div>
-            <div>Escalation status:</div>
+            <div>
+              <div>Escalation status:</div>
+              <div>
+                Escalation time:
+                {{ incidentDetails.escalationPolicy }}
+                m
+              </div>
+            </div>
           </div>
+
           <div class="buttons">
-            <v-btn class="comment" @click="showPage('comments')">
+            <v-btn
+              class="createButtons"
+              :color="colorComment"
+              @click="showPage('comments')"
+            >
+              <!-- class="red--text"  change text -->
               Comments
             </v-btn>
 
-            <v-btn @click="showPage('activityLog')"> activity Log</v-btn>
+            <v-btn
+              @click="showPage('activityLog')"
+              :color="colorActivityLog"
+              class="createButtons"
+            >
+              activity Log</v-btn
+            >
 
-            <v-btn @click="showPage('updates')" class="update"> Updates </v-btn>
+            <v-btn
+              @click="showPage('updates')"
+              class="update"
+              :color="colorUpdates"
+            >
+              Updates
+            </v-btn>
           </div>
 
           <div v-if="buttonName == `comments`">
@@ -160,6 +192,13 @@
                       {{ comment.comment }}
                     </v-col>
                     <v-col cols="3">
+                      <div
+                        v-if="comment.updated == 'yes'"
+                        class="updatedomment"
+                      >
+                        updated
+                      </div>
+
                       {{ comment.createdAt.replace("T", " ").split(".")[0] }}
                     </v-col>
                   </v-row>
@@ -172,14 +211,11 @@
           </div>
           <!-- update comment -->
           <div v-else-if="buttonName == `updates`">
-            <div v-for="comment in comments" :key="comment.id">
-              <!-- <div v-if="comment.userId == userId">
-
-              </div> -->
-              <!-- <v-row justify="space-around" v-if="comment.userId == userId">
+            <div>
+              <v-row justify="space-around">
                 <v-col cols="8">
                   <v-text-field
-                    v-model="update"
+                    v-model="updateText"
                     label="update comment"
                     dense
                     value=""
@@ -187,11 +223,11 @@
                   ></v-text-field>
                 </v-col>
                 <v-col cols="4">
-                  <v-btn @click="updateComment(comment.id, update)">
+                  <v-btn @click="updateCommentFun" class="update">
                     Update comment</v-btn
                   >
                 </v-col>
-              </v-row> -->
+              </v-row>
             </div>
           </div>
         </div>
@@ -224,8 +260,8 @@ export default {
         { text: "state", value: "state" },
         { text: "Deadline", value: "deadline" },
         // { text: "category", value: "category" },
-        // { text: "Escalati  on policy", value: "escalationPolicy" },
-        { text: "responders", value: "responderId" },
+        { text: "Escalation policy", value: "escalationPolicy" },
+        { text: "responder", value: "responderId" },
       ],
       name: "Noof",
       dialog: false,
@@ -233,12 +269,15 @@ export default {
       value: "",
       incident: [],
       comment: "",
-      buttonName: "",
+      buttonName: "comments",
       showCommentForm: false,
       userName: "",
       userId: null,
       setComment: "",
-      update: "",
+      updateText: "",
+      colorComment: "#2f9aef",
+      colorActivityLog: "",
+      colorUpdates: "",
     };
   },
   computed: {
@@ -251,6 +290,7 @@ export default {
       "creator",
       "allUsers",
       "commentUpdated",
+      "responderData",
     ]),
   },
 
@@ -259,16 +299,19 @@ export default {
     this.incidentId = await this.$route.query.incidentId;
     await this.$store.dispatch("getIncidentsDetails", this.incidentId);
     this.incident = [this.incidentDetails];
-    await this.getComments(this.incidentDetails.id);
+
+    await this.getComments({
+      incidentId: this.incidentDetails.id,
+      // userId: this.userId,
+    });
     this.getAttachments(this.incidentDetails.id);
-    this.getResponder();
+
     await this.getUsers();
-    console.log(this.comments, "this.comments");
+    // this.getResponderById(this.incidentDetails.responderId);
     // this.comments.filter((com) => {
     //   com.userId == this.userId ? (this.setComment = com.comment) : "";
     // });
     this.comments;
-    console.log(this.setComment, "this.setComment");
     this.creatorId = localStorage.getItem("creatorId");
 
     this.getCreatorById(this.creatorId);
@@ -286,6 +329,7 @@ export default {
       "getCreatorById",
       "getUsers",
       "updateComment",
+      "getResponderById",
     ]),
     async addComment() {
       this.showCommentForm = true;
@@ -296,16 +340,46 @@ export default {
         incidentId: this.incidentDetails.id,
         comment: this.comment,
         userId: localStorage.getItem("userId"),
+        updated: "no",
       });
       this.comment = "";
-      this.getComments(this.incidentDetails.id);
+      this.getComments({
+        incidentId: this.incidentDetails.id,
+        // userId: this.userId,
+      });
     },
 
-    async updateComment(id, value) {
-      await this.updateComment({ id: id, body: value });
+    async updateCommentFun() {
+      console.log(
+        this.updateText,
+        this.incidentDetails.id,
+        this.userId,
+        "heeeeeeeeeeeeeeeeereeeeeeeee"
+      );
+      await this.updateComment({
+        comment: this.updateText,
+        userId: this.userId,
+        incidentId: this.incidentDetails.id,
+        updated: "yes",
+      });
     },
     showPage(value) {
       this.buttonName = value;
+      if (value == "activityLog") {
+        this.colorComment = "rgb(230 230 230)";
+        this.colorUpdates = "rgb(230 230 230)";
+        this.colorActivityLog = "#2f9aef";
+      }
+      if (value == "comments") {
+        this.colorComment = "#2f9aef";
+        this.colorUpdates = "rgb(230 230 230)";
+        this.colorActivityLog = "rgb(230 230 230)";
+      }
+      if (value == "updates") {
+        this.colorComment = "rgb(230 230 230)";
+        this.colorUpdates = "#2f9aef";
+        this.colorActivityLog = "rgb(230 230 230)";
+      }
     },
   },
 };
@@ -367,9 +441,7 @@ button.creatIncident.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size-
 h3 {
   padding: 10px;
 }
-/* p.para {
-  color: #a5a596;
-} */
+
 .v-input__slot {
   background-color: white;
 }
@@ -387,9 +459,6 @@ input#input-16 {
   width: 100%;
   max-height: 400px;
 }
-/* .incidentDes {
-  display: flex;
-} */
 
 .rightDetails {
   width: 60%;
@@ -403,10 +472,7 @@ input#input-16 {
 a.attachements {
   padding: 0px 17px;
 }
-/* button.activityLog.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--default {
-  background-color: #e6e6e6;
-  color: #929292;
-} */
+
 button.update.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--default {
   background-color: #e6e6e6;
   color: #929292;
@@ -414,17 +480,15 @@ button.update.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--defaul
 button.comment.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--default {
   color: snow;
   background-color: #2f9aef;
+  text-transform: none;
 }
-.comment {
-  text-transform: unset !important;
-  /* color: #2f9aef; */
-  background-color: #2f9aef;
-}
+
 .activityLog {
   text-transform: unset !important;
 }
 .update {
-  text-transform: unset !important;
+  text-transform: none;
+  color: snow;
 }
 .leftDetails {
   padding: 23px;
@@ -432,10 +496,6 @@ button.comment.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--defau
   /* overflow: auto !important; */
   max-height: 400px;
 }
-/* h5 {
-  font-size: 16px;
-  color: #4f4f4f;
-} */
 
 h6 {
   color: rgb(118 118 118);
@@ -455,14 +515,8 @@ h6 {
 .task {
   width: 100%;
   display: flex;
-  /* justify-content: end; */
 }
-/* .v-card.v-sheet.theme--light.rounded-0 {
-  border: solid 2px #ededed;
-} */
-/* html {
-  overflow: hidden;
-} */
+
 p.paraDes {
   background-color: #ffffff;
   width: 100%;
@@ -472,5 +526,8 @@ p.paraImpacted {
   background-color: #ffffff;
   width: 100%;
   height: 20%;
+}
+.updatedomment {
+  color: #2f9aef;
 }
 </style>

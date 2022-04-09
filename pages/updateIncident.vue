@@ -317,13 +317,16 @@
               ></v-checkbox>
             </div>
             <div class="buttons">
-              <v-btn class="cancel" @click.native="close"> Cancel </v-btn>
+              <v-btn class="createButtons" @click.native="close">
+                Cancel
+              </v-btn>
               <v-btn
                 @click="
                   validate();
                   updateIncident();
                 "
                 :disabled="!valid"
+                class="createButtons"
                 >Update</v-btn
               >
             </div>
@@ -400,6 +403,7 @@ export default {
           "Severity description should be at most 300 characters",
       ],
       escalationPolicy: "",
+      userId: null,
     };
   },
 
@@ -407,19 +411,15 @@ export default {
     ...mapGetters([
       "allInventories",
       "allImpactedIssues",
-      // "allIncident",
       "allFacilities",
       "allSuppliers",
-      // "newAttachment",
-      // "newAssignee",
-      // "creator",
       "allUsers",
-      // "newAttachment",
       "incidentDetails",
       "updatedIncident",
     ]),
   },
   async mounted() {
+    this.userId = localStorage.getItem("userId");
     await this.getIncidentsDetails(this.incidentId);
     this.subject = this.incidentDetails.subject;
     this.impactFinancial = this.incidentDetails.impactFinancial;
@@ -448,21 +448,14 @@ export default {
 
   methods: {
     ...mapActions([
-      // "getAllIncidents",
       "getInventories",
       "getAllSuppliers",
       "getAllFacility",
       "getAllImpactedIssues",
-
-      // "createAttachment",
-      // "createResponder",
-      // "getCreatorById",
       "getUsers",
-      // "createIncidentAssignee",
-      // "getIncidentsCreatedByMe",
-      // "getIncidentByAssigneeToMe",
       "getIncidentsDetails",
       "updateIncidentById",
+      "getIncidentByAssigneeToMe",
     ]),
 
     // remove(index) {
@@ -523,6 +516,7 @@ export default {
         formData.append("incidentId", response.id);
         this.createAttachment(formData);
       }
+      this.getIncidentByAssigneeToMe(this.userId);
     },
     validate() {
       this.$refs.form.validate();
@@ -623,7 +617,6 @@ input#input-85 {
   > .v-input__slot,
 .v-text-field.v-text-field--enclosed .v-text-field__details {
   padding: 0 12px;
-  /* background-color: snow; */
 }
 .checkbox {
   display: flex;
@@ -646,16 +639,7 @@ h5 {
 .task {
   width: 116%;
 }
-button.createBut.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--default {
-  background-color: #4992db;
-  text-transform: unset;
-  color: snow;
-}
-button.cancel.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--default {
-  background-color: #e7e7e7;
-  color: #c2c2c2;
-  text-transform: unset;
-}
+
 .theme--light.v-input input,
 .theme--light.v-input textarea {
   color: rgba(0, 0, 0, 0.87);

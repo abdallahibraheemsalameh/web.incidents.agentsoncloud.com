@@ -52,146 +52,121 @@
       color="rgb(227 227 227)"
       value="100"
       height="2"
+      class="mt-4"
     ></v-progress-linear>
-    <div class="header">
-      <div class="counters">
-        <div class="OLA">
-          <h3 class="headerOLA">OLA : {{ impactOperational() }}</h3>
-          <p class="paraOLA">Operational level Agreement Incident</p>
+    <div class="d-flex justify-space-between mx-8 my-2">
+      <div class="d-flex flex-column">
+        <div class="d-flex">
+          <h4>OLA : {{ impactOperational() }}</h4>
+          <span class="ml-2">Operational level Agreement Incident</span>
         </div>
-        <div class="SLA">
-          <h3 class="headerSLA">SLA : {{ impactFinancial() }}</h3>
-          <p class="paraSLA">Service level Agreement Incident</p>
+        <div class="d-flex">
+          <h4>SLA : {{ impactFinancial() }}</h4>
+          <span class="ml-2">Service level Agreement Incident</span>
         </div>
       </div>
-      <div class="creatAndSearch">
-        <div class="created">
-          <v-btn
-            color="accent"
-            @click.stop="showCreateForm = true"
-            class="textBtu"
-          >
-            + Create Incident</v-btn
-          >
-          <CreateIncident v-if="showCreateForm" :dialog.sync="showCreateForm" />
-        </div>
+      <div class="create-btn">
+        <v-btn
+          color="accent"
+          @click.stop="showCreateForm = true"
+          class="textBtu"
+        >
+          + Create Incident</v-btn
+        >
+        <CreateIncident
+          v-if="showCreateForm"
+          :dialog.sync="showCreateForm"
+          @getIncidents="getIncidents"
+        />
       </div>
     </div>
-    <div>
-      <v-card>
-        <v-container fluid>
-          <v-row>
-            <v-col cols="1"> filter by: </v-col>
-            <v-col cols="3">
-              <v-row>
-                <v-col cols="6">
-                  <v-menu>
-                    <template v-slot:activator="{ attrs, on }">
-                      <v-btn class="impactedIssue" v-bind="attrs" v-on="on"
-                        >impacted issue</v-btn
-                      >
-                    </template>
-                    <v-list>
-                      <v-list-item
-                        v-for="(impactedIssue, i) in allImpactedIssues"
-                        :key="i"
-                        link
-                        @change="
-                          selectionImpactedIssue(
-                            impactedIssue.name,
-                            impactedIssue.id
-                          )
-                        "
-                      >
-                        <v-list-item-title
-                          v-text="impactedIssue.name"
-                        ></v-list-item-title>
-                      </v-list-item>
-                    </v-list>
-                  </v-menu>
-                </v-col>
-                <v-col cols="6">
-                  <v-autocomplete
-                    :items="itemNames"
-                    dense
-                    chips
-                    small-chips
-                    solo
-                    label="Search"
-                    @change="filterImpactedIssue"
-                  ></v-autocomplete>
-                </v-col>
-              </v-row>
-            </v-col>
-            <v-col cols="2">
-              <v-autocomplete
-                v-model="valueFilter"
-                :items="priorityFilter"
-                dense
-                chips
-                small-chips
-                label="Priority"
-                @change="filterIncidents('priority', valueFilter)"
-                solo
-              ></v-autocomplete>
-            </v-col>
-            <v-col cols="2">
-              <v-autocomplete
-                v-model="valueFilter"
-                :items="stateFilter"
-                dense
-                chips
-                small-chips
-                label="State"
-                solo
-                @change="filterIncidents('state', valueFilter)"
-              ></v-autocomplete>
-            </v-col>
-            <v-col cols="2">
-              <v-autocomplete
-                v-model="creatorId"
-                :items="allUsers"
-                dense
-                chips
-                small-chips
-                label="creator name"
-                item-value="id"
+    <v-progress-linear
+      color="rgb(227 227 227)"
+      value="100"
+      height="2"
+      class="mt-2"
+    ></v-progress-linear>
+    <!-- Filter -->
+    <div class="mt-2 ml-8">
+      <v-row class="my-0 mx-0">
+        <v-col class="py-0 px-0" cols="1">Filter by:</v-col>
+        <v-col class="py-0 px-1" cols="3">
+          <v-row class="my-0 mx-0">
+            <v-col class="py-0 px-1" cols="6">
+              <v-select
+                :items="allImpactedIssues"
+                v-model="issue"
                 item-text="name"
-                solo
-                @change="filterCreatorName()"
-              >
-                <!-- <template #label>
-                  <v-icon large color="green darken-2"> mdi-minus </v-icon>
-                </template> -->
-              </v-autocomplete>
-            </v-col>
-            <v-col cols="2">
-              <v-btn
-                elevation="2"
+                return-object
+                label="impacted issue"
                 dense
-                chips
-                small-chips
                 solo
-                @click="clearFilter"
-                >Clear filter</v-btn
-              >
+                @change="selectionImpactedIssue()"
+              ></v-select>
+            </v-col>
+            <v-col class="py-0 px-1" cols="6">
+              <v-autocomplete
+                :items="itemNames"
+                dense
+                solo
+                label="Search"
+                @change="filterImpactedIssue"
+              ></v-autocomplete>
             </v-col>
           </v-row>
-        </v-container>
-      </v-card>
+        </v-col>
+        <v-col class="py-0 px-1" cols="2">
+          <v-autocomplete
+            v-model="valueFilter"
+            :items="priorityFilter"
+            dense
+            label="Priority"
+            @change="filterIncidents('priority', valueFilter)"
+            solo
+          ></v-autocomplete>
+        </v-col>
+        <v-col class="py-0 px-1" cols="2">
+          <v-autocomplete
+            v-model="valueFilter"
+            :items="stateFilter"
+            dense
+            label="State"
+            solo
+            @change="filterIncidents('state', valueFilter)"
+          ></v-autocomplete>
+        </v-col>
+        <v-col class="py-0 px-1" cols="2">
+          <v-autocomplete
+            v-model="creatorId"
+            :items="allUsers"
+            dense
+            label="creator name"
+            item-value="id"
+            item-text="name"
+            solo
+            @change="filterCreatorName()"
+          >
+          </v-autocomplete>
+        </v-col>
+        <v-col class="py-0 ml-8" cols="1">
+          <v-btn elevation="2" dense chips small-chips solo @click="clearFilter"
+            >Clear filter</v-btn
+          >
+        </v-col>
+      </v-row>
     </div>
 
     <template>
-      <!-- <v-card>
-        <v-card-title> -->
-      <v-text-field
-        v-model="search"
-        append-icon="mdi-magnify"
-        label="Search"
-        single-line
-        hide-details
-      ></v-text-field>
-      <!-- </v-card-title> -->
+      <div class="mx-8">
+        <v-text-field
+          class="mt-0 pt-0"
+          v-model="search"
+          append-icon="mdi-magnify"
+          label="Search"
+          single-line
+          hide-details
+        ></v-text-field>
+      </div>
 
       <v-data-table
         :headers="headers"
@@ -200,17 +175,18 @@
         show-expand
         single-expand
       >
-        <template v-slot:[`item.responderId`]="{ item }">
-          <div v-for="user in responder" :key="user.id">
-            <div v-if="item.id == responder.id">{{}}</div>
-          </div>
-        </template>
+        <!-- <template
+          v-slot:[`item.responderId`]="{ item }"
+          :responId="item.responderId"
+        >
+          {{ responders.name }}
+        </template> -->
         <template #[`item.icon`]="{ item }">
           <Ellipsis
             :creatorIdProps="item.creatorId"
             :incidentIdProps="item.id"
             :itemProps="item"
-            @edit="updateData"
+            @getIncidents="getIncidents"
           />
         </template>
         <template v-slot:[`item.subject`]="{ value, item }">
@@ -226,10 +202,7 @@
           <div v-if="item.creatorId == userId">Assignee</div>
           <div v-else>{{ creator.name }}</div>
         </template>
-        <!-- <template v-slot:[`item.responderId`]>
-            <div>{{ creator.name }}</div>
 
-          </template> -->
         <template v-slot:[`item.impactedIssues`]="{ item }">
           <div
             v-for="impactedIssue in item.ImpactedIssues"
@@ -261,11 +234,16 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 export default {
+  // props: {
+  //   responId: {
+  //     type: String,
+  //     required: true,
+  //   },
+  // },
   data() {
     return {
       buttonName: "",
       search: "",
-      responderId: "",
       headers: [],
       incidents: [],
       name: "Noof",
@@ -298,13 +276,16 @@ export default {
       itemName: null,
       filterBy: {},
       user: "",
+      responderId: null,
+      responders: {},
+      iddd: null,
+      issue: null,
     };
   },
   computed: {
     ...mapGetters([
       "allIncident",
       "allUsers",
-      "responder",
       "creator",
       "incidentsCreatedByMe",
       "allIncidentsAssigneeToMe",
@@ -313,16 +294,15 @@ export default {
       "allFacilities",
       "allSuppliers",
       "allUsers",
+      "responderData",
     ]),
   },
 
   async mounted() {
     this.userId = localStorage.getItem("userId");
     this.getCreatorById(this.userId);
-    console.log(this.creator, "creator");
-    this.getIncidentsCreatedByMe({ id: this.userId });
-    await this.getIncidentByAssigneeToMe(this.userId);
-    this.showIncidents = this.allIncidentsAssigneeToMe;
+    await this.getIncidents();
+    this.showIncidents = await this.allIncidentsAssigneeToMe;
     this.getHeaders("Creator");
     await this.getUsers();
     this.getAllImpactedIssues();
@@ -334,24 +314,17 @@ export default {
     this.getAllFacility();
     this.getAllSuppliers();
     this.getUsers();
-    // console.log(this.showIncidents[0].responderId, "iiiiiiiiiiiiiiiiiiiii");
-    // await this.getResponderById(this.showIncidents[0].responderId);
-    // console.log(this.responder, "this.responder");
-    // this.priority = await this.showIncidents.map((incident) => {
-    //   return incident.priority;
+    // this.responders = this.incidentsCreatedByMe.map((elem) => {
+    //   return elem.responderId;
     // });
-    // console.log(this.priority.sort(), "this.priority");
-    // this.responders = await this.responders.filter((responder) => {
-    //   return responder.responderName;
-    // });
-
-    // this.incidents = [this.allIncident];
+    // console.log(this.responders, "jjjjjthis.responders");
+    // await this.getResponderById(this.responId);
+    this.responders = this.responderData;
   },
   methods: {
     ...mapActions([
       "getAllIncidents",
       "getUsers",
-      "getResponder",
       "getCreatorById",
       "getIncidentsCreatedByMe",
       "getIncidentByAssigneeToMe",
@@ -360,6 +333,7 @@ export default {
       "getAllSuppliers",
       "getAllFacility",
       "getUsers",
+      "getResponderById",
       "getResponderById",
     ]),
     getHeaders(creatorHeader) {
@@ -398,12 +372,10 @@ export default {
       );
       return result.length;
     },
-    getIncidentCreatedByMe(incident) {
-      // incident = this.incidentsCreatedByMe;
+    getIncidentCreatedByMe() {
       this.getHeaders("Assignee");
       this.showAssigneeToMe = false;
       this.showIncidents = this.incidentsCreatedByMe;
-      console.log(this.showIncidents, "this.showIncidents");
     },
     assignedToMe() {
       this.getHeaders("Creator");
@@ -411,8 +383,9 @@ export default {
       this.showIncidents = this.allIncidentsAssigneeToMe;
       console.log(this.showIncidents, "assignedToMe");
     },
-    updateData() {
-      console.log(this.showIncidents, "0000000000000000000000000000updaye");
+    async getIncidents() {
+      await this.getIncidentByAssigneeToMe();
+      await this.getIncidentsCreatedByMe();
       this.showIncidents = this.showAssigneeToMe
         ? this.allIncidentsAssigneeToMe
         : this.incidentsCreatedByMe;
@@ -443,9 +416,9 @@ export default {
       this.filterIncidents("creatorId", +this.creatorId);
     },
 
-    selectionImpactedIssue(name, id) {
+    selectionImpactedIssue() {
+      const { name, id } = this.issue;
       this.selectedImpactedIssueId = id;
-      console.log(this.selectedImpactedIssueId, "this.selectedImpactedIssueId");
       const itemsLists = {
         Facilities: this.allFacilities,
         Suppliers: this.allSuppliers,
@@ -485,19 +458,11 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .table {
   overflow-x: hidden;
   overflow-y: auto;
-}
-p.paraOLA {
-  padding: 12px 18px;
-}
-h3.headerSLA {
-  margin-top: -13px;
-}
-p.paraSLA {
-  margin-right: 46px;
 }
 .textBtu {
   text-transform: none;

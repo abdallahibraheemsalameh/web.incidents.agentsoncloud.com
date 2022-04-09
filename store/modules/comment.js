@@ -16,7 +16,7 @@ const getters = {
   },
 };
 const actions = {
-  async createComment({ commit }, { incidentId, comment, userId }) {
+  async createComment({ commit }, { incidentId, comment, userId, updated }) {
     try {
       const commentCreated = await this.$axios.$post(
         "/incident-management/comment",
@@ -24,6 +24,7 @@ const actions = {
           incidentId,
           comment,
           userId,
+          updated,
         }
       );
       commit("setComment", commentCreated);
@@ -31,23 +32,23 @@ const actions = {
       console.log(err);
     }
   },
-  async getComments({ commit }, incidentId) {
+  async getComments({ commit }, { userId, incidentId }) {
+    const comments = await this.$axios.$post(
+      `/incident-management/comment/${incidentId}`
+      // { userId }
+    );
     try {
-      const comments = await this.$axios.$get(
-        `/incident-management/comment/${incidentId}`
-      );
       commit("comments", comments);
     } catch (err) {
-      console.log(err);
+      console.log(err.message);
     }
   },
-  async updateComment({ commit }, { id, body }) {
+  async updateComment({ commit }, { comment, userId, incidentId, updated }) {
     try {
-      const comments = await this.$axios.$put(
-        `/incident-management/comment/${id}`,
-        { body }
+      const comments = await this.$axios.$post(
+        `/incident-management/comment/update/comment`,
+        { comment, userId, incidentId, updated }
       );
-      console.log(comments, "ccoooooooooooooooooooo");
       commit("commentUpdate", comments);
     } catch (err) {
       console.log(err);

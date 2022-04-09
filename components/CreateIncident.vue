@@ -18,21 +18,25 @@
             <!-- <v-combobox
               v-model="subject"
               :items="subjectsIncident"
-              dense
-              filled
               label="Subject"
               :rules="subjectRules"
               background-color="#ffffff"
+              height="40"
             ></v-combobox> -->
             <v-text-field
-              background="rgb(145 145 145)"
+              background-color="#ffffff"
               name="input-7-1"
               v-model="subject"
               value=""
-              class="inputDescription"
               :rules="subjectRules"
+              height="35"
+              outlined
             ></v-text-field>
-            <hr />
+            <v-progress-linear
+              color="rgb(227 227 227)"
+              value="100"
+              height="1"
+            ></v-progress-linear>
             <h5 class="subjects">Incident causes</h5>
             <div class="checkbox">
               <v-checkbox
@@ -45,13 +49,19 @@
               description: please explain (who-why-what-where-how-when)
             </p>
             <v-text-field
-              background="rgb(145 145 145)"
+              name="input-7-1"
               v-model="description"
               value=""
-              class="inputDescription"
               :rules="descriptionRules"
+              height="110"
+              outlined
+              background-color="#ffffff"
             ></v-text-field>
-            <hr />
+            <v-progress-linear
+              color="rgb(227 227 227)"
+              value="100"
+              height="1"
+            ></v-progress-linear>
             <h5 class="subjects">Priority</h5>
             <div class="impact">
               <div class="d-flex flex-row mb-2">
@@ -281,7 +291,7 @@
 
             <h5 class="subjects">responders</h5>
             <v-autocomplete
-              v-model="responder"
+              v-model="responderId"
               :items="allUsers"
               item-text="name"
               item-value="id"
@@ -291,16 +301,63 @@
             ></v-autocomplete>
 
             <h5 class="subjects">Deadline</h5>
-
+            <!-- Date picker -->
             <div>
-              select date and time
-              <datetime
-                v-model="deadline"
-                title="Deadline"
-                auto
-                type="datetime"
-              >
-              </datetime>
+              <div v-if="datePicker">
+                <v-date-picker
+                  v-model="date"
+                  :min="new Date().toISOString().substr(0, 10)"
+                ></v-date-picker>
+                <div class="ml-16">
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="(datePicker = false), (data = '')"
+                  >
+                    Cancel
+                  </v-btn>
+                  <v-btn text color="primary" @click="datePicker = false">
+                    OK
+                  </v-btn>
+                </div>
+              </div>
+              <v-text-field
+                v-model="date"
+                label="Select date"
+                prepend-icon="mdi-calendar"
+                readonly
+                @click="datePicker = true"
+              ></v-text-field>
+            </div>
+
+            <!-- timePicker -->
+            <div>
+              <v-text-field
+                v-model="time"
+                label="Select time"
+                prepend-icon="mdi-clock-time-four-outline"
+                readonly
+                @click="timePicker = true"
+              ></v-text-field>
+              <div v-if="timePicker">
+                <v-time-picker
+                  v-model="time"
+                  ampm-in-title
+                  format="ampm"
+                ></v-time-picker>
+                <div class="ml-16">
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="(timePicker = false), (time = null)"
+                  >
+                    Cancel
+                  </v-btn>
+                  <v-btn text color="primary" @click="timePicker = false">
+                    OK
+                  </v-btn>
+                </div>
+              </div>
             </div>
 
             <h5>Escalation duration</h5>
@@ -311,10 +368,8 @@
               value=""
               solo
             ></v-text-field>
-
             <div class="attachments">
               <div class="addAttachments">add attachments</div>
-
               <div>
                 <v-file-input
                   v-model="files"
@@ -350,19 +405,16 @@
                 label="to be as a task sent to assignee"
                 v-model="task"
                 background-color="rgb(238 238 238)"
+                class="ml-5"
               ></v-checkbox>
             </div>
             <div class="buttons">
-              <v-btn class="cancel">draft</v-btn>
-              <v-btn class="cancel" @click.native="close"> Cancel </v-btn>
+              <v-btn class="createButtons">draft</v-btn>
+              <v-btn class="createButtons" @click.native="close">
+                Cancel
+              </v-btn>
 
-              <v-btn
-                @click="
-                  validate();
-                  create();
-                "
-                :disabled="!valid"
-                class="createBut"
+              <v-btn @click="create()" :disabled="!valid" class="createButtons"
                 >Create</v-btn
               >
             </div>
@@ -458,9 +510,14 @@ export default {
       impactedIssuesNumber: [1],
       selectedImpactedIssueId: null,
       itemName: null,
-      valid: true,
+      valid: false,
       userId: null,
       responder: {},
+      time: null,
+      timePicker: false,
+      picker: null,
+      date: new Date().toISOString().slice(0, 10),
+      datePicker: false,
     };
   },
 
@@ -530,6 +587,10 @@ export default {
       }
     },
     async create() {
+      if (!this.$refs.form.validate()) {
+        return;
+      }
+
       const data = {
         creatorId: localStorage.getItem("userId"),
         priority: this.getPriority(),
@@ -541,8 +602,8 @@ export default {
         impactDescription: this.impactDescription,
         state: this.state,
         referenceId: this.referenceId,
-        responderId: this.responder,
-        deadline: this.deadline,
+        responderId: this.responderId,
+        deadline: this.deadlineFun(),
         type: this.type,
         reasonForCreation: this.ReasonCreation,
         category: this.category,
@@ -555,41 +616,23 @@ export default {
           : [],
         assignee: this.assignee,
       };
-      await this.$axios
-        .$post(`/incident-management/incident`, data)
+      const response = await this.$axios.$post(
+        `/incident-management/incident`,
+        data
+      );
 
-        .then((response) => {
-          if (
-            !data.subject ||
-            !data.subject.length ||
-            !data.description.length ||
-            !data.description ||
-            !data.impactedIssues ||
-            !data.impactedIssues.length ||
-            !data.assignee ||
-            !data.assignee.length
-          ) {
-            return;
-          }
-          console.log(response, "-----------------response");
-          // Upload fiels
-          if (this.files.length) {
-            const formData = new FormData();
-            for (let file of this.files) {
-              formData.append("files", file, file.name);
-            }
-            formData.append("incidentId", response.id);
-            this.createAttachment(formData);
-          }
+      // Upload fiels
+      if (this.files.length) {
+        const formData = new FormData();
+        for (let file of this.files) {
+          formData.append("files", file, file.name);
+        }
+        formData.append("incidentId", response.id);
+        this.createAttachment(formData);
+      }
 
-          this.$emit("update:dialog", false);
-          this.getCreatorById(response.creatorId);
-          console.log(this.creator, "ghghghghg");
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-      this.getIncidentByAssigneeToMe({ id: this.userId });
+      this.$emit("update:dialog", false);
+      this.$emit("getIncidents");
     },
 
     impactFinancialFun() {
@@ -627,18 +670,21 @@ export default {
     addIssueList() {
       this.impactedIssuesNumber.push(1);
     },
-    validate() {
-      this.$refs.form.validate();
+    deadlineFun() {
+      if (this.date == null || this.time == null) {
+        return null;
+      }
+      return this.date + " " + this.time;
     },
   },
 };
 </script>
 
-/*
 <style>
 .buttons {
   display: flex;
   justify-content: space-between;
+  padding: 0px 22px;
 }
 button.typeIncident.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--default {
   width: 119%;
@@ -651,15 +697,7 @@ h5.subjects {
   margin: 5px 5px;
 }
 .container {
-  /* background-color: snow; */
   border: solid 5px #f2f2f2;
-  /* width: 77%; */
-}
-.create {
-  background-color: #e0e0de;
-  width: 100%;
-  padding: 12px;
-  margin-top: -9px;
 }
 
 .row.justify-space-between {
@@ -671,8 +709,6 @@ form.v-form {
 }
 .rightDiv.col-md-4.col-12 {
   margin-right: 90px;
-}
-.v-input__slot {
 }
 
 .theme--light.v-btn.v-btn--has-bg {
@@ -709,23 +745,12 @@ h5 {
 .task {
   width: 116%;
 }
-button.createBut.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--default {
-  background-color: #4992db;
-  text-transform: unset;
-  color: snow;
-}
-button.cancel.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--default {
-  background-color: #e7e7e7;
-  color: #c2c2c2;
-  text-transform: unset;
-}
+
 .theme--light.v-input input,
 .theme--light.v-input textarea {
   color: rgba(0, 0, 0, 0.87);
 }
-.inputDescription {
-  border: solid 2px rgb(225 225 225);
-}
+
 button.impactedIssue.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--default {
   text-transform: unset;
 }
@@ -752,9 +777,9 @@ textarea#input-102 {
   display: flex;
   justify-content: space-around;
 }
-.addAttachments {
+/* .addAttachments {
   padding: 8px 0px;
-}
+} */
 .v-text-field__slot {
   width: 89px;
 }
@@ -764,5 +789,11 @@ textarea#input-102 {
 }
 .rightDiv.col-md-4.col-12 {
   margin-right: 100px;
+}
+.createButtons {
+  text-transform: none;
+}
+.v-menu__content.theme--light.v-menu__content--fixed.menuable__content__active {
+  background-color: #ffffff;
 }
 </style>

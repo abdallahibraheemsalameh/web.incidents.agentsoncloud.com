@@ -15,21 +15,20 @@ const actions = {
   async getCreatorById({ commit }, id) {
     try {
       const creator = await this.$axios.$get(`/user-management/users/${id}`);
-      console.log(creator, "creator");
       commit("creatorData", creator);
     } catch (err) {
       console.log(err);
     }
   },
-  async getResponderById({ commit }, id) {
-    try {
-      const responder = await this.$axios.$get(`/user-management/users/${id}`);
-      console.log(responder, "responder");
-      commit("responderData", responder);
-    } catch (err) {
-      console.log(err);
-    }
-  },
+  // async getResponderById({ commit }, id) {
+  //   try {
+  //     const responder = await this.$axios.$get(`/user-management/users/${id}`);
+  //     console.log(responder, "responder");
+  //     commit("responderData", responder);
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // },
 };
 const mutations = {
   creatorData: (state, creator) => (state.creator = creator),
