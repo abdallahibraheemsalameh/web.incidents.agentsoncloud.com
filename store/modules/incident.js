@@ -87,15 +87,7 @@ const actions = {
     try {
       const users = await this.$axios.$get("/user-management/users");
 
-      commit("setUser", users);
-    } catch (err) {
-      console.log(err);
-    }
-  },
-  async getResponderById({ commit }, id) {
-    try {
-      const user = await this.$axios.$get(`/user-management/users/${id}`);
-      commit("getUser", user);
+      commit("setUsers", users);
     } catch (err) {
       console.log(err);
     }
@@ -152,7 +144,7 @@ const mutations = {
   setIncidents: (state, incidents) => (state.incidents = incidents),
   newIncident: (state, incident) => state.incidents.push(incident),
   setIncidentDetails: (state, incident) => (state.incident = incident),
-  setUser: (state, users) => (state.users = users),
+  setUsers: (state, users) => (state.users = users),
   setIncidentsAssigneeToMe: (state, incidents) =>
     (state.incidentsAssigneeToMe = incidents),
   setIncidentsCreatedByMe: (state, incidents) =>

@@ -163,7 +163,13 @@
             </div>
             <div class="d-flex flex-column mb-2">
               <h5 class="subjects">Linked issue</h5>
-              <div
+              <!-- <SelectIssue
+                @setIssueAndItem="selectionImpactedIssue"
+                :issueId="issue.id"
+                :issueName="issue.name"
+                :itemName="issue.IncidentImpactedIssue.item"
+              /> -->
+              <!-- <div
                 class="d-flex flex-row mb-2"
                 v-for="(elment, i) in impactedIssuesNumber"
                 :key="i"
@@ -206,7 +212,7 @@
                   </div>
                 </template>
                 <v-icon v-if="i === 0" @click="addIssueList"> mdi-plus</v-icon>
-              </div>
+              </div> -->
             </div>
           </v-col>
           <v-col cols="9" sm="6" md="6">
@@ -378,7 +384,7 @@
                   show-size
                   multiple
                   clearable
-                  @change="inputChanged"
+                  @change="handleImage"
                   label="upload"
                   height="32"
                   class="file"
@@ -444,6 +450,8 @@ export default {
   },
   data() {
     return {
+      imgs: [],
+      image: "",
       // message: "",
       valueRequired: true,
 
@@ -551,6 +559,29 @@ export default {
   },
   watch: {},
   methods: {
+    handleImage(e) {
+      console.log("imgs =>", e);
+      const selectedImage = e; //e.target.files[0]; get first file
+
+      e.forEach((img) => {
+        this.createBase64Image(img);
+      });
+    },
+    createBase64Image(fileObject) {
+      console.log("fileObject", fileObject);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.image = e.target.result;
+        this.uploadImage();
+      };
+      reader.readAsDataURL(fileObject);
+    },
+    uploadImage() {
+      const { image } = this;
+      this.imgs.push(image);
+      console.log("this.imgs", this.imgs);
+    },
+
     ...mapActions([
       "getAllIncidents",
       "getInventories",
@@ -587,6 +618,12 @@ export default {
       }
     },
     async create() {
+      console.log(
+        "updateFun",
+        this.itemName,
+        this.selectedImpactedIssueId,
+        "eeeeeeeeeeeeeeeeeee"
+      );
       if (!this.$refs.form.validate()) {
         return;
       }
@@ -620,17 +657,18 @@ export default {
         `/incident-management/incident`,
         data
       );
-
+      console.log(response, "response");
       // Upload fiels
-      if (this.files.length) {
-        const formData = new FormData();
-        for (let file of this.files) {
-          formData.append("files", file, file.name);
-        }
-        formData.append("incidentId", response.id);
-        this.createAttachment(formData);
-      }
-
+      // if (this.files.length) {
+      //   const formData = new FormData();
+      //   for (let file of this.files) {
+      //     formData.append("files", file, file.name);
+      //   }
+      //   formData.append("incidentId", response.id);
+      //   this.createAttachment(formData);
+      // }
+      let fromData = { id: response.id, files: this.imgs };
+      this.createAttachment(fromData);
       this.$emit("update:dialog", false);
       this.$emit("getIncidents");
     },
@@ -649,20 +687,23 @@ export default {
       this.ReasonCreation = value;
     },
 
-    selectionImpactedIssue(name, id) {
+    selectionImpactedIssue(id, item) {
+      console.log(id, item, "====================");
       this.selectedImpactedIssueId = id;
-      const itemsLists = {
-        Facilities: this.allFacilities,
-        Suppliers: this.allSuppliers,
-        "Inventory item": this.allInventories,
-        "Consumer profile": this.allUsers,
-        Appointment: this.allSuppliers,
-        "Users profiles": this.allUsers,
-      };
-      this.itemList = itemsLists[name];
-      this.itemNames = this.itemList.map((item) => {
-        return item.name;
-      });
+      this.itemName = item;
+      // this.selectedImpactedIssueId = id;
+      // const itemsLists = {
+      //   Facilities: this.allFacilities,
+      //   Suppliers: this.allSuppliers,
+      //   "Inventory item": this.allInventories,
+      //   "Consumer profile": this.allUsers,
+      //   Appointment: this.allSuppliers,
+      //   "Users profiles": this.allUsers,
+      // };
+      // this.itemList = itemsLists[name];
+      // this.itemNames = this.itemList.map((item) => {
+      //   return item.name;
+      // });
     },
     setItemName(event, i) {
       this.itemName = event;

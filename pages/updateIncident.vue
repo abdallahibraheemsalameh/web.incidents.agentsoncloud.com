@@ -153,48 +153,15 @@
             <div class="d-flex flex-column mb-2">
               <h5 class="subjects">Linked issue</h5>
               <div
-                class="d-flex flex-row mb-2"
-                v-for="(elment, i) in impactedIssuesNumber"
-                :key="i"
+                v-for="(issue, id) in incidentDetails.ImpactedIssues"
+                :key="id"
               >
-                <v-menu>
-                  <template v-slot:activator="{ attrs, on }">
-                    <v-btn class="impactedIssue" v-bind="attrs" v-on="on"
-                      >Issue name ...</v-btn
-                    >
-                  </template>
-                  <v-list>
-                    <v-list-item
-                      v-for="(impactedIssue, i) in allImpactedIssues"
-                      :key="i"
-                      link
-                      @change="
-                        selectionImpactedIssue(
-                          impactedIssue.name,
-                          impactedIssue.id
-                        )
-                      "
-                    >
-                      <v-list-item-title
-                        v-text="impactedIssue.name"
-                      ></v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-
-                <template>
-                  <div>
-                    <v-autocomplete
-                      :items="itemNames"
-                      dense
-                      filled
-                      label="Search"
-                      :rules="issueRules"
-                      @change="setItemName($event, i)"
-                    ></v-autocomplete>
-                  </div>
-                </template>
-                <v-icon v-if="i === 0" @click="addIssueList"> mdi-plus</v-icon>
+                <SelectIssue
+                  @setIssueAndItem="selectionImpactedIssue"
+                  :issueId="issue.id"
+                  :issueName="issue.name"
+                  :itemName="issue.IncidentImpactedIssue"
+                />
               </div>
             </div>
           </v-col>
@@ -338,7 +305,6 @@
 </template>
 
 <script>
-import Vue from "vue";
 import { Datetime } from "vue-datetime";
 
 import "vue-datetime/dist/vue-datetime.css";
@@ -354,6 +320,7 @@ export default {
 
   data() {
     return {
+      imgs: [],
       severityLevel: "",
       subjectsIncident: [],
       subject: "",
@@ -421,6 +388,7 @@ export default {
   async mounted() {
     this.userId = localStorage.getItem("userId");
     await this.getIncidentsDetails(this.incidentId);
+    console.log("incidentDetails", this.incidentDetails);
     this.subject = this.incidentDetails.subject;
     this.impactFinancial = this.incidentDetails.impactFinancial;
     this.description = this.incidentDetails.description;
@@ -447,6 +415,23 @@ export default {
   },
 
   methods: {
+    handleImage(e) {
+      const selectedImage = e; //e.target.files[0]; get first file
+      this.createBase64Image(selectedImage);
+    },
+    createBase64Image(fileObject) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.image = e.target.result;
+        this.uploadImage();
+      };
+      reader.readAsDataURL(fileObject);
+    },
+    uploadImage() {
+      const { image } = this;
+      this.data.img = image;
+    },
+
     ...mapActions([
       "getInventories",
       "getAllSuppliers",
@@ -469,7 +454,12 @@ export default {
     },
 
     updateIncident() {
-      console.log("updateFun", this.subject);
+      console.log(
+        "updateFun",
+        this.itemName,
+        this.selectedImpactedIssueId,
+        "pppppppppppppppppppp"
+      );
       const data = {
         creatorId: localStorage.getItem("userId"),
         priority: this.getPriority(),
@@ -528,20 +518,21 @@ export default {
     addIssueList() {
       this.impactedIssuesNumber.push(1);
     },
-    selectionImpactedIssue(name, id) {
+    selectionImpactedIssue(id, item) {
       this.selectedImpactedIssueId = id;
-      const itemsLists = {
-        Facilities: this.allFacilities,
-        Suppliers: this.allSuppliers,
-        "Inventory item": this.allInventories,
-        "Consumer profile": this.allUsers,
-        Appointment: this.allSuppliers,
-        "Users profiles": this.allUsers,
-      };
-      this.itemList = itemsLists[name];
-      this.itemNames = this.itemList.map((item) => {
-        return item.name;
-      });
+      this.itemName = item;
+      // const itemsLists = {
+      //   Facilities: this.allFacilities,
+      //   Suppliers: this.allSuppliers,
+      //   "Inventory item": this.allInventories,
+      //   "Consumer profile": this.allUsers,
+      //   Appointment: this.allSuppliers,
+      //   "Users profiles": this.allUsers,
+      // };
+      // this.itemList = itemsLists[name];
+      // this.itemNames = this.itemList.map((item) => {
+      //   return item.name;
+      // });
     },
     ReasonForCreation(value) {
       this.ReasonCreation = value;

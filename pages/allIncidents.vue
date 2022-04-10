@@ -91,7 +91,8 @@
       <v-row class="my-0 mx-0">
         <v-col class="py-0 px-0" cols="1">Filter by:</v-col>
         <v-col class="py-0 px-1" cols="3">
-          <v-row class="my-0 mx-0">
+          <SelectIssue @setIssueAndItem="filterImpactedIssue" />
+          <!-- <v-row class="my-0 mx-0">
             <v-col class="py-0 px-1" cols="6">
               <v-select
                 :items="allImpactedIssues"
@@ -113,7 +114,7 @@
                 @change="filterImpactedIssue"
               ></v-autocomplete>
             </v-col>
-          </v-row>
+          </v-row> -->
         </v-col>
         <v-col class="py-0 px-1" cols="2">
           <v-autocomplete
@@ -175,12 +176,9 @@
         show-expand
         single-expand
       >
-        <!-- <template
-          v-slot:[`item.responderId`]="{ item }"
-          :responId="item.responderId"
-        >
-          {{ responders.name }}
-        </template> -->
+        <template v-slot:[`item.responderId`]="{ item }">
+          {{ allUsersNameById[item.responderId] }}
+        </template>
         <template #[`item.icon`]="{ item }">
           <Ellipsis
             :creatorIdProps="item.creatorId"
@@ -190,17 +188,19 @@
           />
         </template>
         <template v-slot:[`item.subject`]="{ value, item }">
-          <nuxt-link
-            :to="{
-              path: '/incidentDetails?',
-              query: { incidentId: item.id },
-            }"
-            >{{ value }}</nuxt-link
-          >
+          <div>
+            <nuxt-link
+              :to="{
+                path: '/incidentDetails?',
+                query: { incidentId: item.id },
+              }"
+              >{{ value }}</nuxt-link
+            >
+          </div>
         </template>
         <template v-slot:[`item.creatorId`]="{ item }">
           <div v-if="item.creatorId == userId">Assignee</div>
-          <div v-else>{{ creator.name }}</div>
+          <div v-else>{{ allUsersNameById[item.creatorId] }}</div>
         </template>
 
         <template v-slot:[`item.impactedIssues`]="{ item }">
@@ -217,9 +217,7 @@
           {{ item.deadline ? item.deadline.split("T")[1].split(".")[0] : "" }}
         </template>
         <template v-slot:[`item.escalationPolicy`]="{ item }">
-          Update each
-          {{ item.escalationPolicy ? item.escalationPolicy.split(":")[1] : "" }}
-          m
+          {{ getEscalationPolicy(item.escalationPolicy) }}
         </template>
         <template v-slot:[`item.createdAt`]="{ item }">
           {{ item.createdAt ? item.createdAt.split("T")[0] : "" }} at
@@ -234,6 +232,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 export default {
+  // components: { SelectIssue },
   // props: {
   //   responId: {
   //     type: String,
@@ -276,10 +275,10 @@ export default {
       itemName: null,
       filterBy: {},
       user: "",
-      responderId: null,
       responders: {},
       iddd: null,
       issue: null,
+      allUsersNameById: {},
     };
   },
   computed: {
@@ -293,7 +292,6 @@ export default {
       "allInventories",
       "allFacilities",
       "allSuppliers",
-      "allUsers",
       "responderData",
     ]),
   },
@@ -304,21 +302,16 @@ export default {
     await this.getIncidents();
     this.showIncidents = await this.allIncidentsAssigneeToMe;
     this.getHeaders("Creator");
-    await this.getUsers();
     this.getAllImpactedIssues();
 
+    await this.getUsers();
     this.creatorFilter = this.allUsers.map((user) => {
       return user.name;
     });
     this.getAllIncidents();
     this.getAllFacility();
     this.getAllSuppliers();
-    this.getUsers();
-    // this.responders = this.incidentsCreatedByMe.map((elem) => {
-    //   return elem.responderId;
-    // });
-    // console.log(this.responders, "jjjjjthis.responders");
-    // await this.getResponderById(this.responId);
+    this.userNameById();
     this.responders = this.responderData;
   },
   methods: {
@@ -333,13 +326,11 @@ export default {
       "getAllSuppliers",
       "getAllFacility",
       "getUsers",
-      "getResponderById",
-      "getResponderById",
     ]),
     getHeaders(creatorHeader) {
       this.headers = [
         {
-          text: "Incident subject",
+          text: "Subject",
           align: "start",
           value: "subject",
         },
@@ -355,11 +346,6 @@ export default {
         { text: "", value: "icon" },
       ];
     },
-    // async getResponderName(id) {
-    //   await this.getResponderById(id);
-    //   console.log(this.responder, "this.responderssssssssssssss");
-    //   return "llllll";
-    // },
     impactFinancial() {
       const result = this.allIncident.filter(
         (incident) => incident.impactFinancial
@@ -381,7 +367,6 @@ export default {
       this.getHeaders("Creator");
       this.showAssigneeToMe = true;
       this.showIncidents = this.allIncidentsAssigneeToMe;
-      console.log(this.showIncidents, "assignedToMe");
     },
     async getIncidents() {
       await this.getIncidentByAssigneeToMe();
@@ -404,7 +389,6 @@ export default {
       const incidents = this.showAssigneeToMe
         ? this.allIncidentsAssigneeToMe
         : this.incidentsCreatedByMe;
-      console.log("key, value", this.filterBy, incidents);
       Object.entries(this.filterBy).map(([key, value]) => {
         this.showIncidents = incidents.filter(
           (incident) => incident[key] == value
@@ -416,23 +400,24 @@ export default {
       this.filterIncidents("creatorId", +this.creatorId);
     },
 
-    selectionImpactedIssue() {
-      const { name, id } = this.issue;
-      this.selectedImpactedIssueId = id;
-      const itemsLists = {
-        Facilities: this.allFacilities,
-        Suppliers: this.allSuppliers,
-        "Inventory item": this.allInventories,
-        "Consumer profile": this.allUsers,
-        Appointment: this.allSuppliers,
-        "Users profiles": this.allUsers,
-      };
-      this.itemList = itemsLists[name];
-      this.itemNames = this.itemList.map((item) => {
-        return item.name;
-      });
-    },
-    filterImpactedIssue(value) {
+    // selectionImpactedIssue() {
+    //   const { name, id } = this.issue;
+    //   this.selectedImpactedIssueId = id;
+    //   const itemsLists = {
+    //     Facilities: this.allFacilities,
+    //     Suppliers: this.allSuppliers,
+    //     "Inventory item": this.allInventories,
+    //     "Consumer profile": this.allUsers,
+    //     Appointment: this.allSuppliers,
+    //     "Users profiles": this.allUsers,
+    //   };
+    //   this.itemList = itemsLists[name];
+    //   this.itemNames = this.itemList.map((item) => {
+    //     return item.name;
+    //   });
+    // },
+    filterImpactedIssue(id, item) {
+      console.log("id, item", id, item);
       const incidents = this.showAssigneeToMe
         ? this.allIncidentsAssigneeToMe
         : this.incidentsCreatedByMe;
@@ -440,9 +425,8 @@ export default {
       this.showIncidents = incidents.filter((incident) => {
         const hasIssue = incident.ImpactedIssues.filter(
           ({ IncidentImpactedIssue }) =>
-            IncidentImpactedIssue.ImpactedIssueId ==
-              this.selectedImpactedIssueId &&
-            IncidentImpactedIssue.item == value
+            IncidentImpactedIssue.ImpactedIssueId == id &&
+            IncidentImpactedIssue.item == item
         );
         return hasIssue.length > 0;
       });
@@ -454,6 +438,25 @@ export default {
       this.showIncidents = this.showAssigneeToMe
         ? this.allIncidentsAssigneeToMe
         : this.incidentsCreatedByMe;
+    },
+    getEscalationPolicy(escalationPolicy) {
+      if (!escalationPolicy) {
+        return "";
+      }
+      const arr = escalationPolicy.split(":");
+      if (arr.length === 1) {
+        return ` Update each ${arr[0]} m`;
+      }
+
+      const [hours, minutes] = arr;
+
+      return `Update each ${hours} h and ${minutes} m`;
+    },
+
+    userNameById() {
+      this.allUsers.forEach((user) => {
+        this.allUsersNameById[user.id] = user.name;
+      });
     },
   },
 };

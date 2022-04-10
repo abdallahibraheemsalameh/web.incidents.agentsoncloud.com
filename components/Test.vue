@@ -5,12 +5,8 @@
         Createssssssssssssssssssssssssssssssssssssss Incident
       </div>
 
-      <!-- lllllllllllllllllllllllllllllllllllllllllllllllllllllllllll -->
-
       <v-form ref="form" v-model="valid" lazy-validation>
         <v-row justify="space-between">
-          <!-- lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll -->
-
           <v-col cols="12" md="4">
             <h5 class="subjects">Subject</h5>
             <!-- <div class="search"> -->
