@@ -7,9 +7,8 @@
         item-text="name"
         item-value="id"
         return-object
-        label="impacted issue"
         dense
-        solo
+        label="impacted issue"
         @change="selectionImpactedIssue()"
       ></v-select>
     </v-col>
@@ -18,7 +17,6 @@
         :items="itemNames"
         v-model="item"
         dense
-        solo
         label="Search"
         @change="setItemName"
       ></v-autocomplete>

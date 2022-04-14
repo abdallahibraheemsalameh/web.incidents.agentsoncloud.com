@@ -3,10 +3,10 @@
     <v-row justify="space-between">
       <div class="ml-8 mt-4">
         <v-btn
-          :outlined="showAssigneeToMe"
+          :outlined="activeBtn === 'assignee'"
           color="indigo accent-2"
           elevation="2"
-          :plain="!showAssigneeToMe"
+          :plain="activeBtn !== 'assignee'"
           @click="assignedToMe"
           :text="false"
           class="textBtu"
@@ -14,33 +14,43 @@
           Assigned to me</v-btn
         >
         <v-btn
-          :outlined="!showAssigneeToMe"
+          :outlined="activeBtn === 'createdByMe'"
           color="indigo accent-2"
           elevation="2"
-          :plain="showAssigneeToMe"
+          :plain="activeBtn !== 'createdByMe'"
           @click="getIncidentCreatedByMe"
           class="textBtu"
         >
           Created by me</v-btn
         >
+        <v-btn
+          :outlined="activeBtn === 'responder'"
+          color="indigo accent-2"
+          elevation="2"
+          :plain="activeBtn !== 'responder'"
+          @click="incidentResponder"
+          class="textBtu"
+        >
+          reporting on</v-btn
+        >
       </div>
 
       <div justify="space-around" class="mr-8 mt-4">
         <v-btn
-          :outlined="!history"
+          :outlined="activeBtn === 'history'"
           color="indigo accent-2"
           elevation="2"
-          :plain="history"
+          :plain="activeBtn !== 'history'"
           @click="getHistory"
           class="textBtu"
         >
           Incident history</v-btn
         >
         <v-btn
-          :outlined="!activity"
+          :outlined="activeBtn === 'activityLog'"
           color="indigo accent-2"
           elevation="2"
-          :plain="activity"
+          :plain="activeBtn !== 'activityLog'"
           @click="goActivity"
           class="textBtu"
         >
@@ -73,6 +83,7 @@
         >
           + Create Incident</v-btn
         >
+
         <CreateIncident
           v-if="showCreateForm"
           :dialog.sync="showCreateForm"
@@ -92,29 +103,6 @@
         <v-col class="py-0 px-0" cols="1">Filter by:</v-col>
         <v-col class="py-0 px-1" cols="3">
           <SelectIssue @setIssueAndItem="filterImpactedIssue" />
-          <!-- <v-row class="my-0 mx-0">
-            <v-col class="py-0 px-1" cols="6">
-              <v-select
-                :items="allImpactedIssues"
-                v-model="issue"
-                item-text="name"
-                return-object
-                label="impacted issue"
-                dense
-                solo
-                @change="selectionImpactedIssue()"
-              ></v-select>
-            </v-col>
-            <v-col class="py-0 px-1" cols="6">
-              <v-autocomplete
-                :items="itemNames"
-                dense
-                solo
-                label="Search"
-                @change="filterImpactedIssue"
-              ></v-autocomplete>
-            </v-col>
-          </v-row> -->
         </v-col>
         <v-col class="py-0 px-1" cols="2">
           <v-autocomplete
@@ -168,7 +156,7 @@
           hide-details
         ></v-text-field>
       </div>
-
+      <!-- {{ showIncidents }} -->
       <v-data-table
         :headers="headers"
         :items="showIncidents"
@@ -177,7 +165,18 @@
         single-expand
       >
         <template v-slot:[`item.responderId`]="{ item }">
-          {{ allUsersNameById[item.responderId] }}
+          <div v-if="activeBtn === 'responder'">
+            <ShowAssignees :assignees="item.assignees" />
+          </div>
+          <div v-if="activeBtn === 'createdByMe' || activeBtn === 'assignee'">
+            <ShowResponders :responders="item.responders" />
+          </div>
+          <!-- <div v-if="item.responders == []">
+            <ShowResponders
+              :responders="item.responders"
+              :massage="'There is no assignee at this incident'"
+            />
+          </div> -->
         </template>
         <template #[`item.icon`]="{ item }">
           <Ellipsis
@@ -199,8 +198,12 @@
           </div>
         </template>
         <template v-slot:[`item.creatorId`]="{ item }">
-          <div v-if="item.creatorId == userId">Assignee</div>
-          <div v-else>{{ allUsersNameById[item.creatorId] }}</div>
+          <div v-if="activeBtn === 'createdByMe'">
+            <ShowAssignees :assignees="item.assignees" />
+          </div>
+          <div v-if="activeBtn === 'assignee'">
+            {{ allUsersNameById[item.creatorId] }}
+          </div>
         </template>
 
         <template v-slot:[`item.impactedIssues`]="{ item }">
@@ -232,13 +235,6 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 export default {
-  // components: { SelectIssue },
-  // props: {
-  //   responId: {
-  //     type: String,
-  //     required: true,
-  //   },
-  // },
   data() {
     return {
       buttonName: "",
@@ -246,7 +242,7 @@ export default {
       headers: [],
       incidents: [],
       name: "Noof",
-
+      activeBtn: "assignee",
       showCreateForm: false,
       items: ["Update", "update escalation duration", "Add comment", "Delete"],
       value: "",
@@ -255,7 +251,6 @@ export default {
       userId: null,
       showIncidents: [],
       priority: [],
-      showAssigneeToMe: true,
       history: true,
       activity: true,
       showIncidentHistory: false,
@@ -285,23 +280,24 @@ export default {
     ...mapGetters([
       "allIncident",
       "allUsers",
-      "creator",
       "incidentsCreatedByMe",
       "allIncidentsAssigneeToMe",
       "allImpactedIssues",
       "allInventories",
       "allFacilities",
       "allSuppliers",
-      "responderData",
+      // "responderData",
+      "incidentsResponder",
+      "userData",
     ]),
   },
 
   async mounted() {
     this.userId = localStorage.getItem("userId");
-    this.getCreatorById(this.userId);
     await this.getIncidents();
+    await this.getIncidentByResponderToMe();
     this.showIncidents = await this.allIncidentsAssigneeToMe;
-    this.getHeaders("Creator");
+    this.getHeaders("Creator", "Responder");
     this.getAllImpactedIssues();
 
     await this.getUsers();
@@ -312,13 +308,12 @@ export default {
     this.getAllFacility();
     this.getAllSuppliers();
     this.userNameById();
-    this.responders = this.responderData;
+    // this.responders = this.responderData;
   },
   methods: {
     ...mapActions([
       "getAllIncidents",
       "getUsers",
-      "getCreatorById",
       "getIncidentsCreatedByMe",
       "getIncidentByAssigneeToMe",
       "getAllImpactedIssues",
@@ -326,8 +321,9 @@ export default {
       "getAllSuppliers",
       "getAllFacility",
       "getUsers",
+      "getIncidentByResponderToMe",
     ]),
-    getHeaders(creatorHeader) {
+    getHeaders(creatorHeader, responderHeader) {
       this.headers = [
         {
           text: "Subject",
@@ -342,7 +338,7 @@ export default {
         { text: "Deadline", value: "deadline" },
         // { text: "category", value: "category" },
         { text: "Escalation policy", value: "escalationPolicy" },
-        { text: "responder", value: "responderId" },
+        { text: responderHeader, value: "responderId" },
         { text: "", value: "icon" },
       ];
     },
@@ -359,36 +355,45 @@ export default {
       return result.length;
     },
     getIncidentCreatedByMe() {
-      this.getHeaders("Assignee");
-      this.showAssigneeToMe = false;
+      this.getHeaders("Assignee", "Responder");
+      this.activeBtn = "createdByMe";
       this.showIncidents = this.incidentsCreatedByMe;
     },
     assignedToMe() {
-      this.getHeaders("Creator");
-      this.showAssigneeToMe = true;
+      this.getHeaders("Creator", "Responder");
+      this.activeBtn = "assignee";
       this.showIncidents = this.allIncidentsAssigneeToMe;
     },
     async getIncidents() {
       await this.getIncidentByAssigneeToMe();
       await this.getIncidentsCreatedByMe();
-      this.showIncidents = this.showAssigneeToMe
-        ? this.allIncidentsAssigneeToMe
-        : this.incidentsCreatedByMe;
+      this.showIncidents =
+        this.activeBtn == "assignee"
+          ? this.allIncidentsAssigneeToMe
+          : this.incidentsCreatedByMe;
     },
     goActivity() {
-      this.showAssigneeToMe = false;
+      this.activeBtn = "activityLog";
     },
     getHistory() {
+      this.activeBtn = "history";
       this.$router.push(`incidentHistory`);
+    },
+    incidentResponder() {
+      this.getHeaders("Creator", "Assignee");
+
+      this.activeBtn = "responder";
+      this.showIncidents = this.incidentsResponder;
     },
     filterIncidents(key, value) {
       if ((key, value)) {
         this.filterBy[key] = value;
       }
 
-      const incidents = this.showAssigneeToMe
-        ? this.allIncidentsAssigneeToMe
-        : this.incidentsCreatedByMe;
+      const incidents =
+        this.activeBtn == "assignee"
+          ? this.allIncidentsAssigneeToMe
+          : this.incidentsCreatedByMe;
       Object.entries(this.filterBy).map(([key, value]) => {
         this.showIncidents = incidents.filter(
           (incident) => incident[key] == value
@@ -400,27 +405,12 @@ export default {
       this.filterIncidents("creatorId", +this.creatorId);
     },
 
-    // selectionImpactedIssue() {
-    //   const { name, id } = this.issue;
-    //   this.selectedImpactedIssueId = id;
-    //   const itemsLists = {
-    //     Facilities: this.allFacilities,
-    //     Suppliers: this.allSuppliers,
-    //     "Inventory item": this.allInventories,
-    //     "Consumer profile": this.allUsers,
-    //     Appointment: this.allSuppliers,
-    //     "Users profiles": this.allUsers,
-    //   };
-    //   this.itemList = itemsLists[name];
-    //   this.itemNames = this.itemList.map((item) => {
-    //     return item.name;
-    //   });
-    // },
     filterImpactedIssue(id, item) {
       console.log("id, item", id, item);
-      const incidents = this.showAssigneeToMe
-        ? this.allIncidentsAssigneeToMe
-        : this.incidentsCreatedByMe;
+      const incidents =
+        this.activeBtn == "assignee"
+          ? this.allIncidentsAssigneeToMe
+          : this.incidentsCreatedByMe;
 
       this.showIncidents = incidents.filter((incident) => {
         const hasIssue = incident.ImpactedIssues.filter(
@@ -435,9 +425,10 @@ export default {
       this.valueFilter = "";
       this.creatorId = "";
       this.filterBy = null;
-      this.showIncidents = this.showAssigneeToMe
-        ? this.allIncidentsAssigneeToMe
-        : this.incidentsCreatedByMe;
+      this.showIncidents =
+        this.activeBtn == "assignee"
+          ? this.allIncidentsAssigneeToMe
+          : this.incidentsCreatedByMe;
     },
     getEscalationPolicy(escalationPolicy) {
       if (!escalationPolicy) {

@@ -92,13 +92,16 @@
 
           <!-- ////////// -->
           <div id="attachment">
-            <h5>Attachment{{ attachments }}</h5>
             <h5>Attachment</h5>
-            <div v-for="attachment in attachments" :key="attachment.id">
+            <div
+              v-for="attachment in incidentDetails.Attachments"
+              :key="attachment.id"
+            >
               <v-img
-                v-bind:src="'../assets/uploads/' + attachment.attachment"
+                v-bind:src="attachment.attachment"
+                max-height="150"
+                max-width="250"
               ></v-img>
-              image
               <!-- <v-img
                 src="../assets/uploads/"
               ></v-img> -->

@@ -152,6 +152,7 @@
             </div>
             <div class="d-flex flex-column mb-2">
               <h5 class="subjects">Linked issue</h5>
+
               <div
                 v-for="(issue, id) in incidentDetails.ImpactedIssues"
                 :key="id"
@@ -160,7 +161,7 @@
                   @setIssueAndItem="selectionImpactedIssue"
                   :issueId="issue.id"
                   :issueName="issue.name"
-                  :itemName="issue.IncidentImpactedIssue"
+                  :itemName="issue.IncidentImpactedIssue.item"
                 />
               </div>
             </div>
@@ -236,18 +237,65 @@
               label="enter name ....."
               background-color="#ffffff"
             ></v-autocomplete>
-
+            <!-- ////////////////////////////////////////////////////////////////////// -->
             <h5 class="subjects">Deadline</h5>
             <div>
-              select date and time
-              <datetime
-                v-model="deadline"
-                title="Deadline"
-                auto
-                type="datetime"
-              >
-              </datetime>
+              <div v-if="datePicker">
+                <v-date-picker
+                  v-model="date"
+                  :min="new Date().toISOString().substr(0, 10)"
+                ></v-date-picker>
+                <div class="ml-16">
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="(datePicker = false), (data = '')"
+                  >
+                    Cancel
+                  </v-btn>
+                  <v-btn text color="primary" @click="datePicker = false">
+                    OK
+                  </v-btn>
+                </div>
+              </div>
+              <v-text-field
+                v-model="date"
+                label="Select date"
+                prepend-icon="mdi-calendar"
+                readonly
+                @click="datePicker = true"
+              ></v-text-field>
             </div>
+
+            <div>
+              <v-text-field
+                v-model="time"
+                label="Select time"
+                prepend-icon="mdi-clock-time-four-outline"
+                readonly
+                @click="timePicker = true"
+              ></v-text-field>
+              <div v-if="timePicker">
+                <v-time-picker
+                  v-model="time"
+                  ampm-in-title
+                  format="ampm"
+                ></v-time-picker>
+                <div class="ml-16">
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="(timePicker = false), (time = null)"
+                  >
+                    Cancel
+                  </v-btn>
+                  <v-btn text color="primary" @click="timePicker = false">
+                    OK
+                  </v-btn>
+                </div>
+              </div>
+            </div>
+
             <h5>Escalation duration</h5>
             <v-text-field
               v-model="escalationPolicy"
@@ -276,7 +324,7 @@
                 </v-file-input>
               </div>
             </div>
-            <div class="task">
+            <div>
               <v-checkbox
                 label="to be as a task sent to assignee"
                 v-model="task"
@@ -305,17 +353,9 @@
 </template>
 
 <script>
-import { Datetime } from "vue-datetime";
-
-import "vue-datetime/dist/vue-datetime.css";
-// Vue.use(Datetime);
 import { mapActions, mapGetters } from "vuex";
 
 export default {
-  components: {
-    datetime: Datetime,
-  },
-
   props: ["incidentId", "dialog"],
 
   data() {
@@ -371,6 +411,11 @@ export default {
       ],
       escalationPolicy: "",
       userId: null,
+      time: null,
+      timePicker: false,
+      picker: null,
+      date: new Date().toISOString().slice(0, 10),
+      datePicker: false,
     };
   },
 
@@ -389,6 +434,7 @@ export default {
     this.userId = localStorage.getItem("userId");
     await this.getIncidentsDetails(this.incidentId);
     console.log("incidentDetails", this.incidentDetails);
+    console.log(this.incidentDetails.deadline, "dedddddddddddd");
     this.subject = this.incidentDetails.subject;
     this.impactFinancial = this.incidentDetails.impactFinancial;
     this.description = this.incidentDetails.description;
@@ -400,7 +446,8 @@ export default {
     this.type = this.incidentDetails.type;
     this.assignee = this.assignee;
     this.responder = this.responder;
-    this.deadline = this.incidentDetails.deadline;
+    this.time = this.incidentDetails.deadline.split("T")[1].split(".")[0];
+    this.date = this.incidentDetails.deadline.split("T")[0];
     this.state = this.incidentDetails.state;
     this.impactOperational = this.incidentDetails.impactOperational;
     this.escalationPolicy = this.incidentDetails.escalationPolicy;
@@ -443,9 +490,6 @@ export default {
       "getIncidentByAssigneeToMe",
     ]),
 
-    // remove(index) {
-    //   this.files.splice(index, 1);
-    // },
     handelImpact(impactValue) {
       this.impactLevel = impactValue;
     },
@@ -454,12 +498,12 @@ export default {
     },
 
     updateIncident() {
-      console.log(
-        "updateFun",
-        this.itemName,
-        this.selectedImpactedIssueId,
-        "pppppppppppppppppppp"
-      );
+      // console.log(
+      //   "updateFun",
+      //   this.itemName,
+      //   this.selectedImpactedIssueId,
+      //   "pppppppppppppppppppp"
+      // );
       const data = {
         creatorId: localStorage.getItem("userId"),
         priority: this.getPriority(),
@@ -471,7 +515,7 @@ export default {
         impactDescription: this.impactDescription,
         state: this.state,
         // referenceId: this.referenceId,
-        deadline: this.deadline,
+        deadline: this.deadlineFun(),
         type: this.type,
         reasonForCreation: this.ReasonCreation,
         escalationPolicy: this.escalationPolicy,
@@ -484,16 +528,7 @@ export default {
         // responder: this.responder,
       };
       console.log(data, "data");
-      if (
-        !data.subject ||
-        !data.subject.length ||
-        !data.description.length ||
-        !data.description ||
-        !data.impactedIssues ||
-        !data.impactedIssues.length ||
-        !data.assignee ||
-        !data.assignee.length
-      ) {
+      if (!this.$refs.form.validate()) {
         return;
       }
       this.updateIncidentById({ id: this.incidentId, body: data });
@@ -507,6 +542,7 @@ export default {
         this.createAttachment(formData);
       }
       this.getIncidentByAssigneeToMe(this.userId);
+      this.$emit("update:dialog", false);
     },
     validate() {
       this.$refs.form.validate();
@@ -521,18 +557,6 @@ export default {
     selectionImpactedIssue(id, item) {
       this.selectedImpactedIssueId = id;
       this.itemName = item;
-      // const itemsLists = {
-      //   Facilities: this.allFacilities,
-      //   Suppliers: this.allSuppliers,
-      //   "Inventory item": this.allInventories,
-      //   "Consumer profile": this.allUsers,
-      //   Appointment: this.allSuppliers,
-      //   "Users profiles": this.allUsers,
-      // };
-      // this.itemList = itemsLists[name];
-      // this.itemNames = this.itemList.map((item) => {
-      //   return item.name;
-      // });
     },
     ReasonForCreation(value) {
       this.ReasonCreation = value;
@@ -555,10 +579,20 @@ export default {
     setItemName(event) {
       this.itemName = event;
     },
+    deadlineFun() {
+      console.log(this.time, this.date, "hhhhhhhhhhhhhhhhhhhhhh");
+      if (this.date == null || this.time == null) {
+        return null;
+      }
+      return this.date + " " + this.time;
+    },
   },
 };
 </script>
 <style>
+.v-input.v-input--is-label-active.v-input--is-dirty.theme--light.v-input--selection-controls.v-input--checkbox.primary--text {
+  margin-top: 0px;
+}
 .buttons {
   display: flex;
   justify-content: space-between;
@@ -573,9 +607,7 @@ h5.subjects {
   padding: 0px 8px;
   margin: 5px 5px;
 }
-.container {
-  border: solid 5px #f2f2f2;
-}
+
 .create {
   background-color: #e0e0de;
   width: 100%;
@@ -587,12 +619,10 @@ h5.subjects {
   margin: 0px 0px;
   width: 100%;
 }
-form.v-form {
+/* form.v-form {
   background-color: #fbfbfb;
-}
-.rightDiv.col-md-4.col-12 {
-  margin-right: 90px;
-}
+} */
+
 .v-input__slot {
 }
 
@@ -612,12 +642,11 @@ input#input-85 {
 .checkbox {
   display: flex;
   justify-content: flex-end;
-  margin: -38px 21px;
+  margin: -21px -3px;
 }
 
 .descrition {
   color: rgb(159 159 159);
-  padding-top: 22px;
 }
 h6 {
   color: rgb(118 118 118);
@@ -628,7 +657,6 @@ h5 {
   color: rgb(118 118 118);
 }
 .task {
-  width: 116%;
 }
 
 .theme--light.v-input input,
@@ -674,7 +702,9 @@ textarea#input-102 {
   display: flex;
   justify-content: center;
 }
-.rightDiv.col-md-4.col-12 {
-  margin-right: 100px;
+
+p {
+  font-size: 9px;
+  margin-bottom: 0px;
 }
 </style>

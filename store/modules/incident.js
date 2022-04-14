@@ -8,6 +8,7 @@ const state = {
   incidentHistory: [],
   updatedIncident: {},
   user: {},
+  incidentsResponder: [],
 };
 const getters = {
   allIncident(state) {
@@ -18,6 +19,9 @@ const getters = {
   },
   incidentsCreatedByMe(state) {
     return state.incidentsCreatedByMe;
+  },
+  incidentsResponder(state) {
+    return state.incidentsResponder;
   },
   allIncidentsAssigneeToMe(state) {
     return state.incidentsAssigneeToMe;
@@ -34,7 +38,7 @@ const getters = {
   updatedIncident(state) {
     return state.updatedIncident;
   },
-  responderData(state) {
+  userData(state) {
     return state.user;
   },
 };
@@ -47,6 +51,18 @@ const actions = {
       );
       console.log(incidents, "AssigneeToMeAssigneeToMe");
       commit("setIncidentsAssigneeToMe", incidents);
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  async getIncidentByResponderToMe({ commit }) {
+    const id = localStorage.getItem("userId");
+    try {
+      const incidents = await this.$axios.$get(
+        `/incident-management/incident/responder/${id}`
+      );
+      console.log(incidents, "respondersIncident");
+      commit("setIncidentsResponderToMe", incidents);
     } catch (err) {
       console.log(err);
     }
@@ -73,6 +89,7 @@ const actions = {
       console.log(err);
     }
   },
+
   async getIncidentsDetails({ commit }, incidentId) {
     try {
       const incident = await this.$axios.$get(
@@ -85,9 +102,18 @@ const actions = {
   },
   async getUsers({ commit }) {
     try {
-      const users = await this.$axios.$get("/user-management/users");
+      const users = await this.$axios.$get("/incident-management/user");
 
       commit("setUsers", users);
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  async getUserById({ commit }, id) {
+    try {
+      const users = await this.$axios.$get(`/incident-management/user/${id}`);
+
+      commit("setUser", users);
     } catch (err) {
       console.log(err);
     }
@@ -160,7 +186,9 @@ const mutations = {
   setIncidentHistory: (state, incidentHistory) =>
     (state.incidentHistory = incidentHistory),
   changeIncident: (state, incident) => (state.updatedIncident = incident),
-  getUser: (state, user) => (state.user = user),
+  setUser: (state, user) => (state.user = user),
+  setIncidentsResponderToMe: (state, incidentsResponder) =>
+    (state.incidentsResponder = incidentsResponder),
 };
 export default {
   state,

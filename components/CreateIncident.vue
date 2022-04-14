@@ -1,226 +1,172 @@
 <template>
   <v-dialog
     v-model="dialog"
-    width="800"
     light
     persistent
     overlay-color="#ffffff"
     overlay-opacity="0.90"
+    max-width="600px"
   >
-    <v-container>
-      <div class="create">Create Incident</div>
+    <v-card>
+      <v-container>
+        <v-card-title>
+          <span>Create Incident</span>
+        </v-card-title>
+        <v-form ref="form" v-model="valid" lazy-validation>
+          <v-row justify="space-between">
+            <v-col cols="9" sm="6" md="6">
+              <h5 class="subjects">Subject</h5>
 
-      <v-form ref="form" v-model="valid" lazy-validation>
-        <v-row justify="space-between">
-          <v-col cols="9" sm="6" md="6">
-            <h5 class="subjects">Subject</h5>
-
-            <!-- <v-combobox
-              v-model="subject"
-              :items="subjectsIncident"
-              label="Subject"
-              :rules="subjectRules"
-              background-color="#ffffff"
-              height="40"
-            ></v-combobox> -->
-            <v-text-field
-              background-color="#ffffff"
-              name="input-7-1"
-              v-model="subject"
-              value=""
-              :rules="subjectRules"
-              height="35"
-              outlined
-            ></v-text-field>
-            <v-progress-linear
-              color="rgb(227 227 227)"
-              value="100"
-              height="1"
-            ></v-progress-linear>
-            <h5 class="subjects">Incident causes</h5>
-            <div class="checkbox">
-              <v-checkbox
-                v-model="impactFinancial"
-                :label="`impact financial(SLA)`"
-                v-on:change="impactFinancialFun"
-              ></v-checkbox>
-            </div>
-            <p class="descrition">
-              description: please explain (who-why-what-where-how-when)
-            </p>
-            <v-text-field
-              name="input-7-1"
-              v-model="description"
-              value=""
-              :rules="descriptionRules"
-              height="110"
-              outlined
-              background-color="#ffffff"
-            ></v-text-field>
-            <v-progress-linear
-              color="rgb(227 227 227)"
-              value="100"
-              height="1"
-            ></v-progress-linear>
-            <h5 class="subjects">Priority</h5>
-            <div class="impact">
-              <div class="d-flex flex-row mb-2">
-                <h6>Impact description</h6>
-                <template>
-                  <v-chip
-                    class="ma-1"
-                    small
-                    :color="impactLevel === 'Low' ? 'blue' : ''"
-                    link
-                    label
-                    outlined
-                    @click="handelImpact('Low')"
-                  >
-                    Low
-                  </v-chip>
-                  <v-chip
-                    class="ma-1"
-                    small
-                    :color="impactLevel === 'Medium' ? 'blue' : ''"
-                    link
-                    label
-                    outlined
-                    @click="handelImpact('Medium')"
-                  >
-                    Medium
-                  </v-chip>
-                  <v-chip
-                    class="ma-1"
-                    small
-                    :color="impactLevel === 'High' ? 'blue' : ''"
-                    link
-                    label
-                    outlined
-                    @click="handelImpact('High')"
-                  >
-                    High
-                  </v-chip>
-                </template>
-              </div>
-              <v-textarea
-                background="rgb(145 145 145)"
+              <v-text-field
+                background-color="#ffffff"
                 name="input-7-1"
-                v-model="impactDescription"
+                v-model="subject"
                 value=""
-                class="inputImpact"
-                rows="2"
-                :rules="impactRules"
-              ></v-textarea>
-            </div>
-            <div class="impact">
-              <div class="d-flex flex-row mb-2">
-                <h6>Severity description</h6>
-                <template>
-                  <v-chip
-                    class="ma-1"
-                    small
-                    :color="severityLevel === 'Low' ? 'blue' : ''"
-                    link
-                    label
-                    outlined
-                    @click="handelSeverity('Low')"
-                  >
-                    Low
-                  </v-chip>
-                  <v-chip
-                    class="ma-1"
-                    small
-                    :color="severityLevel === 'Medium' ? 'blue' : ''"
-                    link
-                    label
-                    outlined
-                    @click="handelSeverity('Medium')"
-                  >
-                    Medium
-                  </v-chip>
-                  <v-chip
-                    class="ma-1"
-                    small
-                    :color="severityLevel === 'High' ? 'blue' : ''"
-                    link
-                    label
-                    outlined
-                    @click="handelSeverity('High')"
-                  >
-                    High
-                  </v-chip>
-                </template>
+                :rules="subjectRules"
+                height="35"
+                label="Subject*"
+                required
+              ></v-text-field>
+              <!-- <v-progress-linear
+                color="rgb(227 227 227)"
+                value="100"
+                height="1"
+              ></v-progress-linear> -->
+              <h5 class="subjects">Incident causes</h5>
+              <div class="checkbox">
+                <v-checkbox
+                  v-model="impactFinancial"
+                  :label="`impact financial(SLA)`"
+                  v-on:change="impactFinancialFun"
+                ></v-checkbox>
               </div>
-              <v-textarea
-                background="rgb(145 145 145)"
+              <p class="descrition">
+                description: please explain (who-why-what-where-how-when)
+              </p>
+              <v-text-field
                 name="input-7-1"
-                v-model="severityDescription"
-                value=""
-                class="inputImpact"
-                rows="2"
-                :rules="severityRules"
-              ></v-textarea>
-            </div>
-            <div class="d-flex flex-column mb-2">
-              <h5 class="subjects">Linked issue</h5>
-              <!-- <SelectIssue
-                @setIssueAndItem="selectionImpactedIssue"
-                :issueId="issue.id"
-                :issueName="issue.name"
-                :itemName="issue.IncidentImpactedIssue.item"
-              /> -->
-              <!-- <div
-                class="d-flex flex-row mb-2"
-                v-for="(elment, i) in impactedIssuesNumber"
-                :key="i"
-              >
-                <v-menu>
-                  <template v-slot:activator="{ attrs, on }">
-                    <v-btn class="impactedIssue" v-bind="attrs" v-on="on"
-                      >Issue name ...</v-btn
-                    >
-                  </template>
-                  <v-list>
-                    <v-list-item
-                      v-for="(impactedIssue, i) in allImpactedIssues"
-                      :key="i"
+                v-model="description"
+                :rules="descriptionRules"
+                height="110"
+                background-color="#ffffff"
+                lable="Description"
+                required
+              ></v-text-field>
+              <v-progress-linear
+                color="rgb(227 227 227)"
+                value="100"
+                height="1"
+              ></v-progress-linear>
+              <h5 class="subjects">Priority</h5>
+              <div class="impact">
+                <div class="d-flex flex-row mb-2">
+                  <p class="descrip">Impact description</p>
+                  <template>
+                    <v-chip
+                      class="ma-1"
+                      small
+                      :color="impactLevel === 'Low' ? 'blue' : ''"
                       link
-                      @change="
-                        selectionImpactedIssue(
-                          impactedIssue.name,
-                          impactedIssue.id
-                        )
-                      "
+                      label
+                      outlined
+                      @click="handelImpact('Low')"
                     >
-                      <v-list-item-title
-                        v-text="impactedIssue.name"
-                      ></v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-
-                <template>
-                  <div>
-                    <v-autocomplete
-                      :items="itemNames"
-                      dense
-                      filled
-                      label="Search"
-                      :rules="issueRules"
-                      @change="setItemName($event, i)"
-                    ></v-autocomplete>
-                  </div>
-                </template>
-                <v-icon v-if="i === 0" @click="addIssueList"> mdi-plus</v-icon>
-              </div> -->
-            </div>
-          </v-col>
-          <v-col cols="9" sm="6" md="6">
-            <!-- class="rightDiv" -->
-
-            <div class="issue">
-              <!-- Impacted issue -->
-              <!-- <v-autocomplete
+                      Low
+                    </v-chip>
+                    <v-chip
+                      class="ma-1"
+                      small
+                      :color="impactLevel === 'Medium' ? 'blue' : ''"
+                      link
+                      label
+                      outlined
+                      @click="handelImpact('Medium')"
+                    >
+                      Medium
+                    </v-chip>
+                    <v-chip
+                      class="ma-1"
+                      small
+                      :color="impactLevel === 'High' ? 'blue' : ''"
+                      link
+                      label
+                      outlined
+                      @click="handelImpact('High')"
+                    >
+                      High
+                    </v-chip>
+                  </template>
+                </div>
+                <v-text-field
+                  background="rgb(145 145 145)"
+                  name="input-7-1"
+                  v-model="impactDescription"
+                  value=""
+                  class="inputImpact"
+                  rows="2"
+                  :rules="impactRules"
+                ></v-text-field>
+              </div>
+              <div class="impact">
+                <div class="d-flex flex-row mb-2">
+                  <p class="descrip">Severity description</p>
+                  <template>
+                    <v-chip
+                      class="ma-1"
+                      small
+                      :color="severityLevel === 'Low' ? 'blue' : ''"
+                      link
+                      label
+                      outlined
+                      @click="handelSeverity('Low')"
+                    >
+                      Low
+                    </v-chip>
+                    <v-chip
+                      class="ma-1"
+                      small
+                      :color="severityLevel === 'Medium' ? 'blue' : ''"
+                      link
+                      label
+                      outlined
+                      @click="handelSeverity('Medium')"
+                    >
+                      Medium
+                    </v-chip>
+                    <v-chip
+                      class="ma-1"
+                      small
+                      :color="severityLevel === 'High' ? 'blue' : ''"
+                      link
+                      label
+                      outlined
+                      @click="handelSeverity('High')"
+                    >
+                      High
+                    </v-chip>
+                  </template>
+                </div>
+                <v-text-field
+                  background="rgb(145 145 145)"
+                  name="input-7-1"
+                  v-model="severityDescription"
+                  value=""
+                  class="inputImpact"
+                  rows="2"
+                  :rules="severityRules"
+                ></v-text-field>
+              </div>
+              <div class="d-flex flex-column mb-2">
+                <h5 class="subjects">Linked issue</h5>
+                <div>
+                  <SelectIssue @setIssueAndItem="selectionImpactedIssue" />
+                </div>
+              </div>
+            </v-col>
+            <v-col cols="9" sm="6" md="6">
+              <div class="issue">
+                <!-- Impacted issue -->
+                <!-- <v-autocomplete
                 v-for="impactedIssue in impactedIssuesNumber"
                 :key="impactedIssue.id"
                 :items="impactedIssue.name"
@@ -232,202 +178,188 @@
                   selectionImpactedIssue(impactedIssue.name, impactedIssue.id)
                 "
               ></v-autocomplete> -->
-            </div>
-            <h5 class="subjects">Incident type</h5>
-            <v-autocomplete
-              v-model="type"
-              :items="types"
-              filled
-              label="Type"
-              background-color="#ffffff"
-            ></v-autocomplete>
-
-            <h5 class="subjects">Reason for creation</h5>
-            <div>
-              <div class="text-center">
-                <template>
-                  <v-chip
-                    class="ma-1"
-                    small
-                    :color="ReasonCreation === 'On-call' ? 'blue' : ''"
-                    link
-                    label
-                    outlined
-                    @click="ReasonForCreation('On-call')"
-                  >
-                    On-call
-                  </v-chip>
-                  <v-chip
-                    class="ma-1"
-                    small
-                    :color="ReasonCreation === 'Requested' ? 'blue' : ''"
-                    link
-                    label
-                    outlined
-                    @click="ReasonForCreation('Requested')"
-                  >
-                    Requested
-                  </v-chip>
-                  <v-chip
-                    class="ma-1"
-                    small
-                    :color="ReasonCreation === 'By me' ? 'blue' : ''"
-                    link
-                    label
-                    outlined
-                    @click="ReasonForCreation('By me')"
-                  >
-                    By me
-                  </v-chip>
-                </template>
               </div>
-            </div>
-            <h5 class="subjects">assignee</h5>
-            <v-autocomplete
-              v-model="assignee"
-              :items="allUsers"
-              multiple
-              filled
-              item-text="name"
-              item-value="id"
-              :rules="assigneeRules"
-              label="enter name ....."
-              background-color="#ffffff"
-            ></v-autocomplete>
+              <h5 class="subjects">Incident type</h5>
+              <v-autocomplete
+                v-model="type"
+                :items="types"
+                label="Type"
+                background-color="#ffffff"
+              ></v-autocomplete>
 
-            <h5 class="subjects">responders</h5>
-            <v-autocomplete
-              v-model="responderId"
-              :items="allUsers"
-              item-text="name"
-              item-value="id"
-              filled
-              label="enter name ....."
-              background-color="#ffffff"
-            ></v-autocomplete>
-
-            <h5 class="subjects">Deadline</h5>
-            <!-- Date picker -->
-            <div>
-              <div v-if="datePicker">
-                <v-date-picker
-                  v-model="date"
-                  :min="new Date().toISOString().substr(0, 10)"
-                ></v-date-picker>
-                <div class="ml-16">
-                  <v-btn
-                    text
-                    color="primary"
-                    @click="(datePicker = false), (data = '')"
-                  >
-                    Cancel
-                  </v-btn>
-                  <v-btn text color="primary" @click="datePicker = false">
-                    OK
-                  </v-btn>
-                </div>
-              </div>
-              <v-text-field
-                v-model="date"
-                label="Select date"
-                prepend-icon="mdi-calendar"
-                readonly
-                @click="datePicker = true"
-              ></v-text-field>
-            </div>
-
-            <!-- timePicker -->
-            <div>
-              <v-text-field
-                v-model="time"
-                label="Select time"
-                prepend-icon="mdi-clock-time-four-outline"
-                readonly
-                @click="timePicker = true"
-              ></v-text-field>
-              <div v-if="timePicker">
-                <v-time-picker
-                  v-model="time"
-                  ampm-in-title
-                  format="ampm"
-                ></v-time-picker>
-                <div class="ml-16">
-                  <v-btn
-                    text
-                    color="primary"
-                    @click="(timePicker = false), (time = null)"
-                  >
-                    Cancel
-                  </v-btn>
-                  <v-btn text color="primary" @click="timePicker = false">
-                    OK
-                  </v-btn>
-                </div>
-              </div>
-            </div>
-
-            <h5>Escalation duration</h5>
-            <v-text-field
-              v-model="escalationPolicy"
-              label="hh:mm"
-              dense
-              value=""
-              solo
-            ></v-text-field>
-            <div class="attachments">
-              <div class="addAttachments">add attachments</div>
+              <h5 class="subjects">Reason for creation</h5>
               <div>
-                <v-file-input
-                  v-model="files"
-                  full-width:true
-                  small-chips
-                  show-size
-                  multiple
-                  clearable
-                  @change="handleImage"
-                  label="upload"
-                  height="32"
-                  class="file"
-                  outlined
-                  dense
-                >
-                  <!-- <template v-slot:selection="{ text, index }">
-                   addfile
-                  <v-chip
-                    small
-                    text-color="white"
-                    color="#295671"
-                    close
-                    @click:close="remove(index)"
-                  >
-                    {{ text }}
-                  </v-chip>
-                </template> -->
-                </v-file-input>
+                <div class="text-center">
+                  <template>
+                    <v-chip
+                      class="ma-1"
+                      small
+                      :color="ReasonCreation === 'On-call' ? 'blue' : ''"
+                      link
+                      label
+                      outlined
+                      @click="ReasonForCreation('On-call')"
+                    >
+                      On-call
+                    </v-chip>
+                    <v-chip
+                      class="ma-1"
+                      small
+                      :color="ReasonCreation === 'Requested' ? 'blue' : ''"
+                      link
+                      label
+                      outlined
+                      @click="ReasonForCreation('Requested')"
+                    >
+                      Requested
+                    </v-chip>
+                    <v-chip
+                      class="ma-1"
+                      small
+                      :color="ReasonCreation === 'By me' ? 'blue' : ''"
+                      link
+                      label
+                      outlined
+                      @click="ReasonForCreation('By me')"
+                    >
+                      By me
+                    </v-chip>
+                  </template>
+                </div>
               </div>
-            </div>
-            <div class="task">
-              <v-checkbox
-                label="to be as a task sent to assignee"
-                v-model="task"
-                background-color="rgb(238 238 238)"
-                class="ml-5"
-              ></v-checkbox>
-            </div>
-            <div class="buttons">
-              <v-btn class="createButtons">draft</v-btn>
-              <v-btn class="createButtons" @click.native="close">
-                Cancel
-              </v-btn>
+              <h5 class="subjects">assignee</h5>
+              <v-autocomplete
+                v-model="assignee"
+                :items="allUsers"
+                multiple
+                item-text="name"
+                item-value="id"
+                :rules="assigneeRules"
+                label="enter name ....."
+                background-color="#ffffff"
+              ></v-autocomplete>
 
-              <v-btn @click="create()" :disabled="!valid" class="createButtons"
-                >Create</v-btn
-              >
-            </div>
-          </v-col>
-        </v-row>
-      </v-form>
-    </v-container>
+              <h5 class="subjects">responders</h5>
+              <v-autocomplete
+                v-model="responder"
+                :items="allUsers"
+                multiple
+                item-text="name"
+                item-value="id"
+                label="enter name ....."
+                background-color="#ffffff"
+              ></v-autocomplete>
+
+              <h5 class="subjects">Deadline</h5>
+              <div>
+                <div v-if="datePicker">
+                  <v-date-picker
+                    v-model="date"
+                    :min="new Date().toISOString().substr(0, 10)"
+                  ></v-date-picker>
+                  <div class="ml-16">
+                    <v-btn
+                      text
+                      color="primary"
+                      @click="(datePicker = false), (data = '')"
+                    >
+                      Cancel
+                    </v-btn>
+                    <v-btn text color="primary" @click="datePicker = false">
+                      OK
+                    </v-btn>
+                  </div>
+                </div>
+                <v-text-field
+                  v-model="date"
+                  label="Select date"
+                  prepend-icon="mdi-calendar"
+                  readonly
+                  @click="datePicker = true"
+                ></v-text-field>
+              </div>
+
+              <!-- timePicker -->
+              <div>
+                <v-text-field
+                  v-model="time"
+                  label="Select time"
+                  prepend-icon="mdi-clock-time-four-outline"
+                  readonly
+                  @click="timePicker = true"
+                ></v-text-field>
+                <div v-if="timePicker">
+                  <v-time-picker
+                    v-model="time"
+                    ampm-in-title
+                    format="ampm"
+                  ></v-time-picker>
+                  <div class="ml-16">
+                    <v-btn
+                      text
+                      color="primary"
+                      @click="(timePicker = false), (time = null)"
+                    >
+                      Cancel
+                    </v-btn>
+                    <v-btn text color="primary" @click="timePicker = false">
+                      OK
+                    </v-btn>
+                  </div>
+                </div>
+              </div>
+
+              <h5>Escalation duration</h5>
+              <v-text-field
+                v-model="escalationPolicy"
+                label="hh:mm"
+                dense
+                value=""
+              ></v-text-field>
+              <div class="attachments">
+                <p class="addAttachments">add attachments</p>
+                <div>
+                  <v-file-input
+                    v-model="files"
+                    full-width:true
+                    small-chips
+                    show-size
+                    multiple
+                    clearable
+                    @change="handleImage"
+                    label="upload"
+                    height="32"
+                    class="file"
+                    dense
+                  >
+                  </v-file-input>
+                </div>
+              </div>
+              <div>
+                <v-checkbox
+                  label="to be as a task sent to assignee"
+                  v-model="task"
+                ></v-checkbox>
+              </div>
+              <div class="buttons">
+                <v-btn class="createButtons" width="15">draft</v-btn>
+                <v-btn class="createButtons" @click.native="close" width="15">
+                  Cancel
+                </v-btn>
+
+                <v-btn
+                  @click="create()"
+                  :disabled="!valid"
+                  class="createButtons"
+                  width="15"
+                  >Create</v-btn
+                >
+              </div>
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-container>
+    </v-card>
   </v-dialog>
 </template>
 
@@ -478,7 +410,7 @@ export default {
       files: [],
       creatorId: "",
       assigneeId: "",
-      responderId: null,
+      responder: [],
       subject: "",
       subjectRules: [
         (v) => !!v || "Subject is required",
@@ -520,7 +452,7 @@ export default {
       itemName: null,
       valid: false,
       userId: null,
-      responder: {},
+
       time: null,
       timePicker: false,
       picker: null,
@@ -531,8 +463,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      "allInventories",
-      "allImpactedIssues",
       "allIncident",
       "allFacilities",
       "allSuppliers",
@@ -547,12 +477,6 @@ export default {
     console.log("--------------------------create");
 
     this.userId = localStorage.getItem("userId");
-    await this.$store.dispatch("getUsers");
-    this.getAllImpactedIssues();
-    this.getAllIncidents();
-    this.getAllFacility();
-    this.getAllSuppliers();
-    this.getInventories();
     this.subjectsIncident = this.allIncident.map((incident) => {
       return incident.subject;
     });
@@ -582,21 +506,7 @@ export default {
       console.log("this.imgs", this.imgs);
     },
 
-    ...mapActions([
-      "getAllIncidents",
-      "getInventories",
-      "getAllSuppliers",
-      "getAllFacility",
-      "getAllImpactedIssues",
-      "createNewIncident",
-      "createAttachment",
-      "createResponder",
-      "getCreatorById",
-      "getUsers",
-      "createIncidentAssignee",
-      "getIncidentsCreatedByMe",
-      "getIncidentByAssigneeToMe",
-    ]),
+    ...mapActions(["createNewIncident", "createAttachment"]),
     close() {
       this.$emit("update:dialog", false);
     },
@@ -639,7 +549,7 @@ export default {
         impactDescription: this.impactDescription,
         state: this.state,
         referenceId: this.referenceId,
-        responderId: this.responderId,
+        responder: this.responder,
         deadline: this.deadlineFun(),
         type: this.type,
         reasonForCreation: this.ReasonCreation,
@@ -665,10 +575,13 @@ export default {
       //     formData.append("files", file, file.name);
       //   }
       //   formData.append("incidentId", response.id);
+      //   console.log("=================>formData", formData, response.id);
       //   this.createAttachment(formData);
       // }
-      let fromData = { id: response.id, files: this.imgs };
-      this.createAttachment(fromData);
+      if (this.files.length) {
+        const fromData = { id: response.id, files: this.imgs };
+        this.createAttachment(fromData);
+      }
       this.$emit("update:dialog", false);
       this.$emit("getIncidents");
     },
@@ -688,24 +601,10 @@ export default {
     },
 
     selectionImpactedIssue(id, item) {
-      console.log(id, item, "====================");
       this.selectedImpactedIssueId = id;
       this.itemName = item;
-      // this.selectedImpactedIssueId = id;
-      // const itemsLists = {
-      //   Facilities: this.allFacilities,
-      //   Suppliers: this.allSuppliers,
-      //   "Inventory item": this.allInventories,
-      //   "Consumer profile": this.allUsers,
-      //   Appointment: this.allSuppliers,
-      //   "Users profiles": this.allUsers,
-      // };
-      // this.itemList = itemsLists[name];
-      // this.itemNames = this.itemList.map((item) => {
-      //   return item.name;
-      // });
     },
-    setItemName(event, i) {
+    setItemName(event) {
       this.itemName = event;
     },
     addIssueList() {
@@ -725,7 +624,6 @@ export default {
 .buttons {
   display: flex;
   justify-content: space-between;
-  padding: 0px 22px;
 }
 button.typeIncident.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--default {
   width: 119%;
@@ -737,21 +635,13 @@ h5.subjects {
   padding: 0px 8px;
   margin: 5px 5px;
 }
-.container {
-  border: solid 5px #f2f2f2;
-}
-
 .row.justify-space-between {
   margin: 0px 0px;
   width: 100%;
 }
-form.v-form {
-  background-color: #fbfbfb;
-}
 .rightDiv.col-md-4.col-12 {
   margin-right: 90px;
 }
-
 .theme--light.v-btn.v-btn--has-bg {
   background-color: #f5f5f5;
 }
@@ -768,12 +658,11 @@ input#input-85 {
 .checkbox {
   display: flex;
   justify-content: flex-end;
-  margin: -38px 21px;
+  margin: -21px -3px;
 }
 
 .descrition {
   color: rgb(159 159 159);
-  padding-top: 22px;
 }
 h6 {
   color: rgb(118 118 118);
@@ -783,23 +672,20 @@ h6 {
 h5 {
   color: rgb(118 118 118);
 }
-.task {
-  width: 116%;
-}
 
 .theme--light.v-input input,
 .theme--light.v-input textarea {
   color: rgba(0, 0, 0, 0.87);
 }
-
-button.impactedIssue.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--default {
-  text-transform: unset;
+p.descrip {
+  font-size: 9px;
+  margin-bottom: 0px;
 }
-.v-input.inputImpact.v-textarea.theme--light.v-text-field.v-text-field--is-booted {
-  width: 89%;
-
-  margin-left: 8px;
+p.addAttachments {
+  padding: 10px 13px;
+  font-size: 12px;
 }
+
 .v-input.severity.v-textarea.theme--light.v-text-field.v-text-field--is-booted {
   width: 89%;
 
@@ -836,5 +722,8 @@ textarea#input-102 {
 }
 .v-menu__content.theme--light.v-menu__content--fixed.menuable__content__active {
   background-color: #ffffff;
+}
+.v-messages.theme--light {
+  display: none;
 }
 </style>

@@ -1,14 +1,15 @@
 <template>
   <div>
-    <allIncidents />
-    <Navigation />
+    <!-- <allIncidents /> -->
+    <incident-cards />
   </div>
 </template>
 <script>
 import allIncidents from "./allIncidents";
 import Navigation from "../components/Navigation.vue";
+import IncidentCards from "./incidentCards.vue";
 export default {
-  components: { allIncidents, Navigation },
+  components: { allIncidents, Navigation, IncidentCards },
   name: "IndexPage",
   // mounted() {
   //   this.$router.push(`/allIncidents/3`);

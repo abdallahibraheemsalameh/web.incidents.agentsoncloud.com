@@ -1,19 +1,25 @@
 <template>
   <div>
-    <v-btn color="primary" elevation="2" @click="goToIncidentDrawer"
-      >Incident management</v-btn
-    >
+    <v-icon @click.stop="showCard = true">mdi-alert </v-icon>
+    <incident-cards v-if="showCard" />
   </div>
 </template>
 
 <script>
+import incidentCards from "../pages/incidentCards.vue";
 export default {
-  methods: {
-    goToIncidentDrawer() {
-      this.$router.push(`/incidentCards`);
-    },
+  components: { incidentCards },
+  data() {
+    return {
+      showCard: false,
+    };
   },
+  methods: {},
 };
 </script>
 
-<style></style>
+<style>
+.incidentManagement {
+  text-transform: none;
+}
+</style>

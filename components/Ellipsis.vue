@@ -85,13 +85,7 @@ export default {
       });
       this.$emit("getIncidents");
     },
-    ...mapActions([
-      "incidentUpdated",
-      "deleteIncident",
-      "updateIncidentState",
-      "getIncidentsCreatedByMe",
-      "getIncidentByAssigneeToMe",
-    ]),
+    ...mapActions(["incidentUpdated", "deleteIncident", "updateIncidentState"]),
     deleteIncidentFun() {
       this.deleteIncident(this.itemProps.id);
     },
