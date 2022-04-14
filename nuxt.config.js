@@ -6,8 +6,8 @@ export default {
     port: 30221,
   },
   head: {
-    titleTemplate: "%s - frontend",
-    title: "frontend",
+    titleTemplate: "%s - incidents",
+    title: "incidents",
     htmlAttrs: {
       lang: "en",
     },

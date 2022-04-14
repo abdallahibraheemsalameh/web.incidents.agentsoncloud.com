@@ -260,7 +260,9 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import Ellipsis from "../components/IncidentsEllipsis.vue"
 export default {
+  components: {Ellipsis},
   data() {
     return {
       buttonName: "",

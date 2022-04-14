@@ -6,6 +6,7 @@
 <script>
 import allIncidents from "./allIncidents";
 export default {
+  layout: "dashboard",
   components: { allIncidents },
   name: "IndexPage",
   // mounted() {
