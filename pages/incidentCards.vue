@@ -95,9 +95,7 @@
             </v-col> -->
           </v-row>
         </v-toolbar>
-        <v-icon large @click="goToIncidentPage"
-          >mdi-checkbox-marked-outline
-        </v-icon>
+        <v-icon large @click="goToIncidentPage"> mdi-open-in-new </v-icon>
       </v-container>
       <div>
         <v-btn

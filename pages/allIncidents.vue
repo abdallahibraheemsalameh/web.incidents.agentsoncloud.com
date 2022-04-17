@@ -297,7 +297,7 @@ export default {
     await this.getIncidents();
     await this.getIncidentByResponderToMe();
     this.showIncidents = await this.allIncidentsAssigneeToMe;
-    this.getHeaders("Creator", "Responder");
+    this.getHeaders("Creator", "reporter");
     this.getAllImpactedIssues();
 
     await this.getUsers();
@@ -355,12 +355,12 @@ export default {
       return result.length;
     },
     getIncidentCreatedByMe() {
-      this.getHeaders("Assignee", "Responder");
+      this.getHeaders("Assignee", "reporter");
       this.activeBtn = "createdByMe";
       this.showIncidents = this.incidentsCreatedByMe;
     },
     assignedToMe() {
-      this.getHeaders("Creator", "Responder");
+      this.getHeaders("Creator", "reporter");
       this.activeBtn = "assignee";
       this.showIncidents = this.allIncidentsAssigneeToMe;
     },
