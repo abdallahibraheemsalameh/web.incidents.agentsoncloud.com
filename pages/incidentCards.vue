@@ -216,6 +216,7 @@
                 <Ellipsis
                   v-if="showEllipsis"
                   :creatorIdProps="incident.creatorId"
+                  :activeBtn="activeBtn"
                   :itemProps="incident"
                   :incidentIdProps="incident.id"
                   @getIncidents="getIncidents"

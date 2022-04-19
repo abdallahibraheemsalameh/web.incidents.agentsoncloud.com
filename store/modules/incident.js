@@ -128,12 +128,12 @@ const actions = {
       console.log(err);
     }
   },
-  async updateIncidentState({ commit }, { id, state }) {
+  async updateIncidentState({ commit }, { id, state, actionText }) {
     try {
-      const stateUpdated = await this.$axios.$patch(
+      const stateUpdated = await this.$axios.$put(
         `/incident-management/incident/state/${id}`,
 
-        { state }
+        { state, actionText }
       );
       commit("updateState", stateUpdated);
     } catch (err) {

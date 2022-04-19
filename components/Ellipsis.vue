@@ -6,7 +6,7 @@
       </template>
 
       <!-- Creator -->
-      <v-list class="list" v-if="creatorIdProps === Number(userId)">
+      <v-list class="list" v-if="activeBtn === 'createdByMe'">
         <v-list-item>
           <v-list-item-title
             ><div @click.stop="showCreateForm = true">
@@ -39,14 +39,30 @@
         <v-list-item>
           <v-list-item-title>update escalation duration</v-list-item-title>
         </v-list-item>
-        <v-list-item @change="stateValue('On Hold')">
-          <v-list-item-title>On hold</v-list-item-title>
+        <v-list-item>
+          <v-list-item-title
+            @click.stop="(showText = true), (state = 'On Hold')"
+            >On hold</v-list-item-title
+          >
+          <StateAction
+            v-if="showText"
+            :dialogState.sync="showText"
+            :state="state"
+            :incidentId="itemProps.id"
+            @getIncidents="getIncidents"
+          />
         </v-list-item>
-        <v-list-item @change="stateValue('Resolved (corrective)')">
-          <v-list-item-title>Resolved (corrective)</v-list-item-title>
+        <v-list-item>
+          <v-list-item-title
+            @click.stop="(showText = true), (state = 'Resolved (corrective)')"
+            >Resolved (corrective)</v-list-item-title
+          >
         </v-list-item>
-        <v-list-item @change="stateValue('Closed (preventive)')">
-          <v-list-item-title>Closed (preventive)</v-list-item-title>
+        <v-list-item>
+          <v-list-item-title
+            @click.stop="(showText = true), (state = 'Closed (preventive)')"
+            >Closed (preventive)</v-list-item-title
+          >
         </v-list-item>
       </v-list>
     </v-menu>
@@ -55,10 +71,12 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import Testing from "../pages/testing.vue";
 import updateIncident from "../pages/updateIncident.vue";
+import StateAction from "./StateAction.vue";
 export default {
-  components: { updateIncident },
-  props: ["creatorIdProps", "incidentIdProps", "itemProps"],
+  components: { updateIncident, Testing, StateAction },
+  props: ["creatorIdProps", "incidentIdProps", "itemProps", "activeBtn"],
 
   data() {
     return {
@@ -68,6 +86,7 @@ export default {
       userId: 0,
       userId: localStorage.getItem("userId"),
       showCreateForm: false,
+      showText: false,
     };
   },
   computed: {
@@ -75,14 +94,9 @@ export default {
   },
   async mounted() {
     this.userId = localStorage.getItem("userId");
-    await this.updateIncidentState({ id: this.itemProps.id });
   },
   methods: {
-    async stateValue(value) {
-      await this.updateIncidentState({
-        id: this.itemProps.id,
-        state: value,
-      });
+    async getIncidents(value) {
       this.$emit("getIncidents");
     },
     ...mapActions(["incidentUpdated", "deleteIncident", "updateIncidentState"]),

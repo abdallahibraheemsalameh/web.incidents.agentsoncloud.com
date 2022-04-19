@@ -32,10 +32,9 @@ const actions = {
       console.log(err);
     }
   },
-  async getComments({ commit }, { userId, incidentId }) {
-    const comments = await this.$axios.$post(
+  async getComments({ commit }, { incidentId }) {
+    const comments = await this.$axios.$get(
       `/incident-management/comment/${incidentId}`
-      // { userId }
     );
     try {
       commit("comments", comments);
@@ -43,13 +42,30 @@ const actions = {
       console.log(err.message);
     }
   },
-  async updateComment({ commit }, { comment, userId, incidentId, updated }) {
+  async updateComment({ commit }, { comment, userId, incidentId }) {
     try {
-      const comments = await this.$axios.$post(
-        `/incident-management/comment/update/comment`,
-        { comment, userId, incidentId, updated }
+      const comment = await this.$axios.$put(
+        `/incident-management/comment/update/comment/${incidentId}`,
+        { comment, userId }
       );
-      commit("commentUpdate", comments);
+
+      commit("commentUpdate", comment);
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  async deleteComment({ commit, state }, id) {
+    try {
+      const userId = localStorage.getItem("userId");
+      const deletedId = await this.$axios.$delete(
+        `/incident-management/comment/${id}`,
+        { data: { userId: userId } }
+      );
+      const { comments } = state;
+      const restComments = comments.filter(
+        (comment) => deletedId != comment.id
+      );
+      commit("comments", restComments);
     } catch (err) {
       console.log(err);
     }

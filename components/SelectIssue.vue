@@ -8,8 +8,11 @@
         item-value="id"
         return-object
         dense
-        label="impacted issue"
+        solo
+        label="Linked issue"
         @change="selectionImpactedIssue()"
+        :background-color="background"
+        :height="height"
       ></v-select>
     </v-col>
     <v-col class="py-0 px-1" cols="6">
@@ -17,8 +20,11 @@
         :items="itemNames"
         v-model="item"
         dense
+        solo
         label="Search"
         @change="setItemName"
+        :background-color="background"
+        :height="height"
       ></v-autocomplete>
     </v-col>
   </v-row>
@@ -27,7 +33,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 export default {
-  props: ["issueId", "issueName", "itemName"],
+  props: ["issueId", "issueName", "itemName", "background", "height"],
   data() {
     return {
       selectedImpactedIssueId: null,
@@ -46,6 +52,7 @@ export default {
     ]),
   },
   async mounted() {
+    console.log(this.issueName, this.issueId, this.itemName, "kkkkkkkkkkkkkkk");
     this.issue = { id: this.issueId, name: this.issueName };
     this.item = this.itemName;
     this.selectionImpactedIssue(this.issue);
@@ -73,7 +80,11 @@ export default {
     },
 
     setItemName() {
-      console.log(this.itemName, this.issueId);
+      console.log(
+        this.item,
+        this.selectedImpactedIssueId,
+        "jjjjjjjjjjjjjjjjjjjjjj"
+      );
       this.$emit("setIssueAndItem", this.selectedImpactedIssueId, this.item);
     },
   },

@@ -29,8 +29,11 @@
           single-expand
           item-key="id"
         >
-          <template v-slot:[`item.responderId`]>
-            {{ responderData.name }}
+          <template v-slot:[`item.responderId`]="{ item }">
+            <div>
+              <!-- {{ item.assignees }} -->
+              <ShowAssignees :assignees="item.assignees" />
+            </div>
           </template>
           <template v-slot:[`item.escalationPolicy`]="{ item }">
             Update each
@@ -39,9 +42,9 @@
             }}
             m
           </template>
-          <template v-slot:[`item.creatorId`]>
+          <!-- <template v-slot:[`item.creatorId`]>
             {{ creator.name }}
-          </template>
+          </template> -->
         </v-data-table>
       </v-card>
       <div class="contain">
@@ -92,7 +95,7 @@
 
           <!-- ////////// -->
           <div id="attachment">
-            <h5>Attachment</h5>
+            <h5>Attachments</h5>
             <div
               v-for="attachment in incidentDetails.Attachments"
               :key="attachment.id"
@@ -189,20 +192,21 @@
                       </v-avatar>
                     </v-col>
                     <v-col cols="3">
-                      {{ userName }}
+                      {{ allUsersNameById[comment.userId] }}
                     </v-col>
                     <v-col cols="3">
                       {{ comment.comment }}
                     </v-col>
                     <v-col cols="3">
-                      <div
-                        v-if="comment.updated == 'yes'"
-                        class="updatedomment"
-                      >
-                        updated
-                      </div>
-
                       {{ comment.createdAt.replace("T", " ").split(".")[0] }}
+                    </v-col>
+                    <v-col>
+                      <v-icon @click="updateCommentForm = true">
+                        mdi-pencil</v-icon
+                      >
+                      <v-icon @click="deleteComment(comment.id)">
+                        mdi-delete
+                      </v-icon>
                     </v-col>
                   </v-row>
                 </v-card>
@@ -214,24 +218,68 @@
           </div>
           <!-- update comment -->
           <div v-else-if="buttonName == `updates`">
-            <div>
-              <v-row justify="space-around">
-                <v-col cols="8">
-                  <v-text-field
-                    v-model="updateText"
-                    label="update comment"
-                    dense
-                    value=""
-                    solo
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="4">
-                  <v-btn @click="updateCommentFun" class="update">
-                    Update comment</v-btn
-                  >
-                </v-col>
-              </v-row>
-            </div>
+            <v-row justify="space-around">
+              <v-col cols="8">
+                <v-text-field
+                  v-model="updateText"
+                  label="Update text"
+                  dense
+                  value=""
+                  solo
+                ></v-text-field>
+              </v-col>
+              <v-col cols="4">
+                <v-btn @click="createNewUpdate" class="update"> Update </v-btn>
+              </v-col>
+            </v-row>
+            <v-container>
+              <v-card
+                v-for="update in incidentUpdates"
+                :key="update.id"
+                class="mb-4 pa-4"
+              >
+                <v-row>
+                  <v-col cols="3">
+                    <v-avatar>
+                      <img
+                        src="https://eitrawmaterials.eu/wp-content/uploads/2016/09/person-icon.png"
+                        alt="John"
+                      />
+                    </v-avatar>
+                  </v-col>
+                  <v-col cols="3">
+                    {{ allUsersNameById[update.userId] }}
+                  </v-col>
+                  <v-col cols="3">
+                    {{ update.updateText }}
+                  </v-col>
+                  <v-col cols="3">
+                    {{ update.createdAt.replace("T", " ").split(".")[0] }}
+                  </v-col>
+                  <v-col>
+                    <!-- <v-icon @click="updateCommentForm = true"> mdi-pencil</v-icon>
+                <v-icon @click="deleteComment(comment.id)"> mdi-delete </v-icon> -->
+                  </v-col>
+                </v-row>
+              </v-card></v-container
+            >
+          </div>
+
+          <div v-if="updateCommentForm === true">
+            <v-row justify="space-around">
+              <v-col cols="8">
+                <v-text-field
+                  v-model="updatedComment"
+                  label="update comment"
+                  dense
+                  value=""
+                  solo
+                ></v-text-field>
+              </v-col>
+              <v-col cols="4">
+                <v-btn @click="updateCommentFun" class="update"> Update </v-btn>
+              </v-col>
+            </v-row>
           </div>
         </div>
       </div>
@@ -277,10 +325,13 @@ export default {
       userName: "",
       userId: null,
       setComment: "",
-      updateText: "",
+      updatedComment: "",
       colorComment: "#2f9aef",
       colorActivityLog: "",
       colorUpdates: "",
+      updateCommentForm: false,
+      allUsersNameById: {},
+      updateText: "",
     };
   },
   computed: {
@@ -288,28 +339,26 @@ export default {
       "incidentDetails",
       "newComment",
       "comments",
-      "attachments",
       "responders",
       "creator",
       "allUsers",
       "commentUpdated",
-      "responderData",
+      "incidentUpdates",
     ]),
   },
 
   async mounted() {
     this.userId = localStorage.getItem("userId");
     this.incidentId = await this.$route.query.incidentId;
+    await this.getUsers();
+    this.userNameById();
     await this.$store.dispatch("getIncidentsDetails", this.incidentId);
     this.incident = [this.incidentDetails];
-
     await this.getComments({
       incidentId: this.incidentDetails.id,
       // userId: this.userId,
     });
-    this.getAttachments(this.incidentDetails.id);
 
-    await this.getUsers();
     // this.getResponderById(this.incidentDetails.responderId);
     // this.comments.filter((com) => {
     //   com.userId == this.userId ? (this.setComment = com.comment) : "";
@@ -318,23 +367,24 @@ export default {
     this.creatorId = localStorage.getItem("creatorId");
 
     this.getCreatorById(this.creatorId);
-    this.allUsers.filter((user) =>
-      user.id == this.userId ? (this.userName = user.name) : ""
-    );
+    await this.getIncidentUpdates({ incidentId: this.incidentDetails.id });
   },
   methods: {
     ...mapActions([
       "getIncidentsDetails",
       "createComment",
       "getComments",
-      "getAttachments",
       "getResponder",
       "getCreatorById",
       "getUsers",
       "updateComment",
       "getResponderById",
+      "createUpdate",
+      "getIncidentUpdates",
+      "deleteComment",
     ]),
     async addComment() {
+      console.log("-------------------------create----------------");
       this.showCommentForm = true;
       if (this.comment == "") {
         return;
@@ -343,29 +393,32 @@ export default {
         incidentId: this.incidentDetails.id,
         comment: this.comment,
         userId: localStorage.getItem("userId"),
-        updated: "no",
       });
       this.comment = "";
       this.getComments({
         incidentId: this.incidentDetails.id,
-        // userId: this.userId,
       });
     },
 
     async updateCommentFun() {
-      console.log(
-        this.updateText,
-        this.incidentDetails.id,
-        this.userId,
-        "heeeeeeeeeeeeeeeeereeeeeeeee"
-      );
       await this.updateComment({
-        comment: this.updateText,
+        comment: this.updatedComment,
         userId: this.userId,
         incidentId: this.incidentDetails.id,
-        updated: "yes",
+      });
+      this.updatedComment = "";
+      this.getComments({
+        incidentId: this.incidentDetails.id,
       });
     },
+    // deleteCommentById(id) {
+    //   console.log("sss", id, this.incidentDetails.id, this.userId);
+    //   this.deleteComment({
+    //     id: id,
+    //     userId: this.userId,
+    //     incidentId: this.incidentDetails.id,
+    //   });
+    // },
     showPage(value) {
       this.buttonName = value;
       if (value == "activityLog") {
@@ -383,6 +436,21 @@ export default {
         this.colorUpdates = "#2f9aef";
         this.colorActivityLog = "rgb(230 230 230)";
       }
+    },
+    userNameById() {
+      this.allUsers.forEach((user) => {
+        this.allUsersNameById[user.id] = user.name;
+      });
+      console.log("this.allUsersNameById", this.allUsersNameById);
+    },
+    createNewUpdate() {
+      this.createUpdate({
+        incidentId: this.incidentDetails.id,
+        updateText: this.updateText,
+        userId: this.userId,
+      });
+      this.updateText = "";
+      this.getIncidentUpdates({ incidentId: this.incidentDetails.id });
     },
   },
 };

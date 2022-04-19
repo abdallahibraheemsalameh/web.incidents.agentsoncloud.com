@@ -77,14 +77,14 @@
       </div>
       <div class="create-btn">
         <v-btn
-          color="accent"
           @click.stop="showCreateForm = true"
-          class="textBtu"
+          color="#272727"
+          class="resetBtn"
         >
           + Create Incident</v-btn
         >
 
-        <CreateIncident
+        <testing
           v-if="showCreateForm"
           :dialog.sync="showCreateForm"
           @getIncidents="getIncidents"
@@ -98,52 +98,141 @@
       class="mt-2"
     ></v-progress-linear>
     <!-- Filter -->
-    <div class="mt-2 ml-8">
-      <v-row class="my-0 mx-0">
-        <v-col class="py-0 px-0" cols="1">Filter by:</v-col>
-        <v-col class="py-0 px-1" cols="3">
-          <SelectIssue @setIssueAndItem="filterImpactedIssue" />
-        </v-col>
-        <v-col class="py-0 px-1" cols="2">
-          <v-autocomplete
-            v-model="valueFilter"
-            :items="priorityFilter"
-            dense
-            label="Priority"
-            @change="filterIncidents('priority', valueFilter)"
-            solo
-          ></v-autocomplete>
-        </v-col>
-        <v-col class="py-0 px-1" cols="2">
-          <v-autocomplete
-            v-model="valueFilter"
-            :items="stateFilter"
-            dense
-            label="State"
-            solo
-            @change="filterIncidents('state', valueFilter)"
-          ></v-autocomplete>
-        </v-col>
-        <v-col class="py-0 px-1" cols="2">
-          <v-autocomplete
-            v-model="creatorId"
-            :items="allUsers"
-            dense
-            label="creator name"
-            item-value="id"
-            item-text="name"
-            solo
-            @change="filterCreatorName()"
-          >
-          </v-autocomplete>
-        </v-col>
-        <v-col class="py-0 ml-8" cols="1">
-          <v-btn elevation="2" dense chips small-chips solo @click="clearFilter"
-            >Clear filter</v-btn
-          >
-        </v-col>
-      </v-row>
-    </div>
+    <!-- <div class="mt-2 ml-8"> -->
+    <!-- <v-container class="contain">
+      <v-toolbar elevation="20" class="mainFilter" shaped>
+        <v-row class="my-0 mx-0">
+          <v-col class="py-0 px-0" cols="1">Filter by:</v-col>
+          <v-col class="py-0 px-1" cols="4">
+            <SelectIssue @setIssueAndItem="filterImpactedIssue" />
+          </v-col>
+          <v-col class="py-0 px-1" cols="2">
+            <v-autocomplete
+              v-model="valueFilter"
+              :items="priorityFilter"
+              dense
+              label="Priority"
+              @change="filterIncidents('priority', valueFilter)"
+              solo
+            ></v-autocomplete>
+          </v-col>
+          <v-col class="py-0 px-1" cols="2">
+            <v-autocomplete
+              v-model="valueFilter"
+              :items="stateFilter"
+              dense
+              label="State"
+              solo
+              @change="filterIncidents('state', valueFilter)"
+            ></v-autocomplete>
+          </v-col>
+          <v-col class="py-0 px-1" cols="2">
+            <v-autocomplete
+              v-model="creatorId"
+              :items="allUsers"
+              dense
+              label="creator name"
+              item-value="id"
+              item-text="name"
+              solo
+              @change="filterCreatorName()"
+            >
+            </v-autocomplete>
+          </v-col>
+          <v-col class="py-0 ml-8" cols="1">
+            <v-btn
+              elevation="2"
+              dense
+              chips
+              small-chips
+              solo
+              @click="clearFilter"
+              >Clear filter</v-btn
+            >
+          </v-col>
+        </v-row>
+      </v-toolbar>
+    </v-container> -->
+    <v-container class="contain">
+      <v-toolbar elevation="20" class="main" shaped>
+        <v-row>
+          <v-col class="py-0 px-1 pt-3" cols="4">
+            <SelectIssue
+              @setIssueAndItem="filterImpactedIssue"
+              :background="'rgb(240 240 240)'"
+              :height="'48'"
+            />
+          </v-col>
+          <v-col>
+            <v-autocomplete
+              cols="12"
+              md="3"
+              cache-items
+              class="filterSearch"
+              flat
+              hide-no-data
+              hide-details
+              placeholder="Creator name"
+              solo-inverted
+              v-model="creatorId"
+              :items="allUsers"
+              item-value="id"
+              item-text="name"
+              @change="filterCreatorName()"
+            >
+            </v-autocomplete>
+          </v-col>
+          <v-col>
+            <v-autocomplete
+              cols="12"
+              md="3"
+              v-model="valueFilter"
+              :items="priorityFilter"
+              cache-items
+              class="filterSearch"
+              flat
+              hide-no-data
+              hide-details
+              placeholder="Priority"
+              solo-inverted
+              @change="filterIncidents('priority', valueFilter)"
+            >
+            </v-autocomplete>
+          </v-col>
+          <v-col>
+            <v-autocomplete
+              cols="12"
+              md="3"
+              v-model="valueFilter"
+              :items="stateFilter"
+              cache-items
+              class="filterSearch"
+              flat
+              hide-no-data
+              hide-details
+              placeholder="State"
+              solo-inverted
+              @change="filterIncidents('state', valueFilter)"
+            >
+            </v-autocomplete>
+          </v-col>
+          <v-col>
+            <v-btn
+              elevation="2"
+              dense
+              chips
+              small-chips
+              solo
+              @click="clearFilter"
+              background-color="rgb(240 240 240)"
+              height="48"
+              >Clear filter</v-btn
+            >
+          </v-col>
+        </v-row>
+      </v-toolbar>
+    </v-container>
+    <!-- </div> -->
 
     <template>
       <div class="mx-8">
@@ -171,16 +260,11 @@
           <div v-if="activeBtn === 'createdByMe' || activeBtn === 'assignee'">
             <ShowResponders :responders="item.responders" />
           </div>
-          <!-- <div v-if="item.responders == []">
-            <ShowResponders
-              :responders="item.responders"
-              :massage="'There is no assignee at this incident'"
-            />
-          </div> -->
         </template>
         <template #[`item.icon`]="{ item }">
           <Ellipsis
             :creatorIdProps="item.creatorId"
+            :activeBtn="activeBtn"
             :incidentIdProps="item.id"
             :itemProps="item"
             @getIncidents="getIncidents"
@@ -234,7 +318,9 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import testing from "./testing.vue";
 export default {
+  components: { testing },
   data() {
     return {
       buttonName: "",
@@ -460,5 +546,10 @@ export default {
 }
 .textBtu {
   text-transform: none;
+}
+.mainFilter {
+  padding: 16px 16px 0px 16px;
+  height: 100px !important;
+  background-color: #009688 !important;
 }
 </style>

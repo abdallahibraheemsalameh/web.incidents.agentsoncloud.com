@@ -30,7 +30,7 @@ export default {
   props: {
     assignees: {
       type: Array,
-      default: ["assignees"],
+      default: [""],
     },
   },
   data() {
@@ -41,6 +41,7 @@ export default {
   },
   methods: {
     assigneesByIncidentId() {
+      console.log(this.assignees, "this.assigneesthis.assignees");
       this.assigneeNames = this.assignees.map((assignee) => {
         return assignee.name;
       });

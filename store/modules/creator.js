@@ -14,7 +14,8 @@ const getters = {
 const actions = {
   async getCreatorById({ commit }, id) {
     try {
-      const creator = await this.$axios.$get(`/user-management/users/${id}`);
+      const creator = await this.$axios.$get(`/incident-management/user/${id}`);
+      console.log(creator, "creatorcreatorcreatorcreatorcreator");
       commit("creatorData", creator);
     } catch (err) {
       console.log(err);
