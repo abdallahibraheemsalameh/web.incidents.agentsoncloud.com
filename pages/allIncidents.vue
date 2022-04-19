@@ -318,9 +318,9 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import testing from "./testing.vue";
+import Ellipsis from "../components/IncidentsEllipsis.vue";
 export default {
-  components: { testing },
+  components: { Ellipsis },
   data() {
     return {
       buttonName: "",

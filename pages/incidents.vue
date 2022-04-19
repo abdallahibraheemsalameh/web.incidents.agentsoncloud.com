@@ -9,7 +9,8 @@ import allIncidents from "./allIncidents";
 import Navigation from "../components/Navigation.vue";
 import IncidentCards from "./incidentCards.vue";
 export default {
-  components: { allIncidents, Navigation, IncidentCards },
+  layout: "dashboard",
+  components: { allIncidents },
   name: "IndexPage",
   // mounted() {
   //   this.$router.push(`/allIncidents/3`);
