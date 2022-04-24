@@ -1,13 +1,12 @@
 <template>
   <div>
     <!-- <allIncidents /> -->
-    <incident-cards />
+    <allIncidents />
   </div>
 </template>
 <script>
 import allIncidents from "./allIncidents";
-import Navigation from "../components/Navigation.vue";
-import IncidentCards from "./incidentCards.vue";
+
 export default {
   layout: "dashboard",
   components: { allIncidents },
