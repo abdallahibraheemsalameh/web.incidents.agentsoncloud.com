@@ -33,7 +33,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 export default {
-  props: ["issueId", "issueName", "itemName", "background", "height"],
+  props: ["issueId", "issueName", "itemName", "background", "height", "index"],
   data() {
     return {
       selectedImpactedIssueId: null,
@@ -55,6 +55,7 @@ export default {
     console.log(this.issueName, this.issueId, this.itemName, "kkkkkkkkkkkkkkk");
     this.issue = { id: this.issueId, name: this.issueName };
     this.item = this.itemName;
+    console.log(this.issue, " this.issue this.issue");
     this.selectionImpactedIssue(this.issue);
   },
 
@@ -85,7 +86,12 @@ export default {
         this.selectedImpactedIssueId,
         "jjjjjjjjjjjjjjjjjjjjjj"
       );
-      this.$emit("setIssueAndItem", this.selectedImpactedIssueId, this.item);
+      this.$emit(
+        "setIssueAndItem",
+        this.selectedImpactedIssueId,
+        this.item,
+        this.index
+      );
     },
   },
 };

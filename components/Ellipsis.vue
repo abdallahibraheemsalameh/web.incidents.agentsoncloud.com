@@ -71,11 +71,10 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import Testing from "../pages/testing.vue";
 import updateIncident from "../pages/updateIncident.vue";
 import StateAction from "./StateAction.vue";
 export default {
-  components: { updateIncident, Testing, StateAction },
+  components: { updateIncident, StateAction },
   props: ["creatorIdProps", "incidentIdProps", "itemProps", "activeBtn"],
 
   data() {

@@ -1,22 +1,22 @@
 <template>
-  <v-stepper>
-    <v-stepper-items>
-      <v-dialog
-        v-model="dialog"
-        light
-        persistent
-        overlay-color="#868686"
-        overlay-opacity="0.90"
-        max-width="800px"
-      >
-        <v-card>
-          <v-container>
-            <v-card-title>
-              <span>Create Incident</span>
-            </v-card-title>
-            <v-form ref="form" v-model="valid" lazy-validation>
+  <v-dialog
+    v-model="dialog"
+    light
+    persistent
+    overlay-color="rgb(152 152 152)"
+    overlay-opacity="0.90"
+    max-width="800px"
+  >
+    <v-stepper v-model="step">
+      <v-card-title>
+        <span>Create Incident</span>
+      </v-card-title>
+      <v-form ref="form" v-model="valid" lazy-validation>
+        <v-stepper-items>
+          <v-stepper-content step="1" class="stepContent">
+            <v-card class="mb-2">
               <v-row justify="space-between">
-                <v-col cols="9" sm="6" md="6">
+                <v-col cols="9" sm="" md="">
                   <v-text-field
                     background-color="#ffffff"
                     name="input-7-1"
@@ -27,7 +27,6 @@
                     label="Subject*"
                     required
                   ></v-text-field>
-
                   <div class="checkbox">
                     <v-checkbox
                       v-model="impactFinancial"
@@ -35,9 +34,11 @@
                       v-on:change="impactFinancialFun"
                     ></v-checkbox>
                   </div>
+
                   <p class="descrition">
-                    description: please explain (who-why-what-where-how-when)
+                    description: please explain (who-why-what-where-how)
                   </p>
+
                   <!-- this is whennnnn -->
                   <div>When</div>
                   <div>
@@ -109,20 +110,25 @@
                     </div>
                   </div>
                   <v-text-field
-                    name="input-7-1"
                     v-model="description"
+                    name="input-7-1"
                     :rules="descriptionRules"
-                    height="110"
+                    height="70"
                     background-color="#ffffff"
-                    lable="Description"
+                    label="Description"
                     required
                   ></v-text-field>
-                  <v-progress-linear
-                    color="rgb(227 227 227)"
-                    value="100"
-                    height="1"
-                  ></v-progress-linear>
                   <div class="impact">
+                    <v-text-field
+                      background="rgb(145 145 145)"
+                      name="input-7-1"
+                      v-model="impactDescription"
+                      value=""
+                      class="inputImpact"
+                      rows="2"
+                      :rules="impactRules"
+                      label="Impact description"
+                    ></v-text-field>
                     <div class="d-flex flex-row mb-2">
                       <template>
                         <v-chip
@@ -160,18 +166,20 @@
                         </v-chip>
                       </template>
                     </div>
+                  </div>
+                </v-col>
+                <v-col cols="9" sm="6" md="6">
+                  <div class="impact">
                     <v-text-field
                       background="rgb(145 145 145)"
                       name="input-7-1"
-                      v-model="impactDescription"
+                      v-model="severityDescription"
                       value=""
                       class="inputImpact"
                       rows="2"
-                      :rules="impactRules"
-                      label="Impact description"
+                      :rules="severityRules"
+                      label="Severity description"
                     ></v-text-field>
-                  </div>
-                  <div class="impact">
                     <div class="d-flex flex-row mb-2">
                       <template>
                         <v-chip
@@ -209,31 +217,54 @@
                         </v-chip>
                       </template>
                     </div>
-                    <v-text-field
-                      background="rgb(145 145 145)"
-                      name="input-7-1"
-                      v-model="severityDescription"
-                      value=""
-                      class="inputImpact"
-                      rows="2"
-                      :rules="severityRules"
-                      label="Severity description"
-                    ></v-text-field>
                   </div>
-                  <div class="d-flex flex-column mb-2">
+                  <div
+                    class="d-flex"
+                    v-for="(issue, i) in linkedIssues"
+                    :key="i"
+                  >
+                    <div class="pt-8">
+                      <SelectIssue
+                        @setIssueAndItem="selectionImpactedIssue"
+                        :index="i"
+                      />
+                    </div>
+                    <div class="pt-10 ml-4" v-if="i == 0">
+                      <v-icon @click="addLikedIssue">mdi-plus-circle</v-icon>
+                    </div>
+
+                    <div class="pt-10 ml-4" v-else>
+                      <v-icon @click="removeLikedIssue(i)"
+                        >mdi-minus-circle</v-icon
+                      >
+                    </div>
+                    <div class="pt-5">
+                      <v-checkbox
+                        :disabled="!impactedIssues[i]"
+                        @change="impactedValue($event, i)"
+                        label="Impacted"
+                      ></v-checkbox>
+                    </div>
+                  </div>
+                  <!-- <div v-if="showSelect" class="d-flex">
                     <div>
                       <SelectIssue @setIssueAndItem="selectionImpactedIssue" />
                     </div>
-                  </div>
-                </v-col>
-                <v-col cols="9" sm="6" md="6">
+                    <div class="pt-2 ml-4">
+                      <v-icon @click="showSelect = false"
+                        >mdi-minus-circle</v-icon
+                      >
+                    </div>
+                    <div class="">
+                      <v-checkbox label="Impact"></v-checkbox>
+                    </div>
+                  </div> -->
                   <v-autocomplete
                     v-model="type"
                     :items="types"
                     label="Type"
                     background-color="#ffffff"
                   ></v-autocomplete>
-
                   <div>
                     <div class="text-center">
                       <template>
@@ -273,6 +304,7 @@
                       </template>
                     </div>
                   </div>
+
                   <v-autocomplete
                     v-model="assignee"
                     :items="allUsers"
@@ -280,7 +312,7 @@
                     item-text="name"
                     item-value="id"
                     :rules="assigneeRules"
-                    label="enter name ....."
+                    label="assignee"
                     background-color="#ffffff"
                   ></v-autocomplete>
                   <v-autocomplete
@@ -291,7 +323,6 @@
                     label="Secondary assignee"
                     background-color="#ffffff"
                   ></v-autocomplete>
-
                   <v-autocomplete
                     v-model="responder"
                     :items="allUsers"
@@ -301,7 +332,27 @@
                     label="responder"
                     background-color="#ffffff"
                   ></v-autocomplete>
+                </v-col>
+              </v-row>
+            </v-card>
+            <div class="d-flex justify-end mr-8">
+              <v-btn class="pa-4 ma-4 text-capitalize" @click.native="close">
+                Close
+              </v-btn>
+              <v-btn
+                color="primary"
+                class="pa-4 ma-4 text-capitalize"
+                @click="next"
+              >
+                Next</v-btn
+              >
+            </div>
+          </v-stepper-content>
 
+          <v-stepper-content step="2" class="stepContent">
+            <v-card class="mb-2">
+              <v-row>
+                <v-col>
                   <div>
                     <div v-if="datePicker">
                       <v-date-picker
@@ -330,7 +381,6 @@
                       @click="datePicker = true"
                     ></v-text-field>
                   </div>
-
                   <div>
                     <v-text-field
                       v-model="time"
@@ -360,7 +410,9 @@
                       </div>
                     </div>
                   </div>
+                </v-col>
 
+                <v-col>
                   <v-text-field
                     v-model="escalationPolicy"
                     label=" Escalation duration   hh:mm"
@@ -386,52 +438,54 @@
                       </v-file-input>
                     </div>
                   </div>
-                  mmmm
                   <div>
                     <v-checkbox
                       label="to be as a task sent to assignee"
                       v-model="task"
                     ></v-checkbox>
                   </div>
-                  <div class="buttons">
-                    <v-btn class="createButtons" width="15">draft</v-btn>
-                    <v-btn
-                      class="createButtons"
-                      @click.native="close"
-                      width="15"
-                    >
-                      Cancel
-                    </v-btn>
-
-                    <v-btn
-                      @click="create()"
-                      :disabled="!valid"
-                      class="createButtons"
-                      width="15"
-                      >Create</v-btn
-                    >
-                  </div>
                 </v-col>
               </v-row>
-            </v-form>
-          </v-container>
-        </v-card>
-      </v-dialog>
-    </v-stepper-items>
-  </v-stepper>
+              <!-- Buttons -->
+              <!-- <v-row> -->
+              <div class="d-flex justify-center">
+                <v-btn class="pa-4 ma-4 text-capitalize">draft</v-btn>
+                <v-btn class="pa-4 ma-4 text-capitalize" @click.native="close">
+                  Cancel
+                </v-btn>
+
+                <v-btn
+                  @click="create()"
+                  :disabled="!valid"
+                  class="pa-4 ma-4 text-capitalize"
+                  color="primary"
+                  >Create</v-btn
+                >
+              </div>
+              <!-- </v-row> -->
+            </v-card>
+            <div class="d-flex justify-end mr-8">
+              <v-btn
+                color="primary"
+                class="pa-4 ma-4 text-capitalize"
+                @click="step = 1"
+              >
+                Back
+              </v-btn>
+            </div>
+          </v-stepper-content>
+        </v-stepper-items>
+      </v-form>
+    </v-stepper>
+  </v-dialog>
 </template>
 
 <script>
-import { Datetime } from "vue-datetime";
-
 import "vue-datetime/dist/vue-datetime.css";
 // Vue.use(Datetime);
 import { mapActions, mapGetters } from "vuex";
 
 export default {
-  components: {
-    datetime: Datetime,
-  },
   props: {
     dialog: {
       default: false,
@@ -439,6 +493,7 @@ export default {
   },
   data() {
     return {
+      step: 1,
       imgs: [],
       image: "",
       // message: "",
@@ -462,8 +517,6 @@ export default {
       ],
       issueRules: [(value) => !!value || "Issue is required"],
       assigneeRules: [(value) => !!value.length || "Assignee is required"],
-      dateRules: [(value) => !!value || "date is required"],
-      timeRules: [(value) => !!value || "time is required"],
       impactLevel: "Medium",
       ReasonCreation: "",
       files: [],
@@ -506,9 +559,6 @@ export default {
       file: "",
       issues: [],
       issue: "",
-      impactedIssuesNumber: [1],
-      selectedImpactedIssueId: null,
-      itemName: null,
       valid: false,
       userId: null,
 
@@ -517,11 +567,16 @@ export default {
       picker: null,
       date: new Date().toISOString().slice(0, 10),
       datePicker: false,
-      secondaryAssignee: "",
+      secondaryAssignee: null,
       happeningDate: null,
       happeningDatePicker: false,
       happeningTimePicker: false,
       incidentHappeningTime: null,
+      timeRules: [(value) => !!value || "time is required"],
+      dateRules: [(value) => !!value || "date is required"],
+      linkedIssues: [1],
+      impactedIssues: [],
+      impacted: null,
     };
   },
 
@@ -538,7 +593,7 @@ export default {
     ]),
   },
   async mounted() {
-    console.log("--------------------------create");
+    console.log("--------------------------create", this.impacted);
 
     this.userId = localStorage.getItem("userId");
     this.subjectsIncident = this.allIncident.map((incident) => {
@@ -592,12 +647,7 @@ export default {
       }
     },
     async create() {
-      console.log(
-        "updateFun",
-        this.itemName,
-        this.selectedImpactedIssueId,
-        "eeeeeeeeeeeeeeeeeee"
-      );
+      console.log("updateFun", this.impactedIssues, "eeeeeeeeeeeeeeeeeee");
       if (!this.$refs.form.validate()) {
         return;
       }
@@ -622,9 +672,7 @@ export default {
         impactFinancial: this.impactFinancial,
         impactOperational: this.impactOperational,
         recordStatus: this.record_status,
-        impactedIssues: this.selectedImpactedIssueId
-          ? [{ id: this.selectedImpactedIssueId, item: this.itemName }]
-          : [],
+        impactedIssues: this.impactedIssues,
         assignee: this.assignee,
         secondaryAssignee: this.secondaryAssignee,
         happeningTime: this.handelIncidentHappeningTime(),
@@ -648,6 +696,7 @@ export default {
         const fromData = { id: response.id, files: this.imgs };
         this.createAttachment(fromData);
       }
+      this.step = 1;
       this.$emit("update:dialog", false);
       this.$emit("getIncidents");
     },
@@ -666,15 +715,12 @@ export default {
       this.ReasonCreation = value;
     },
 
-    selectionImpactedIssue(id, item) {
-      this.selectedImpactedIssueId = id;
-      this.itemName = item;
-    },
-    setItemName(event) {
-      this.itemName = event;
-    },
-    addIssueList() {
-      this.impactedIssuesNumber.push(1);
+    selectionImpactedIssue(id, item, index) {
+      const issues = this.impactedIssues;
+      issues[index] = { id, item };
+      this.impactedIssues = [...issues];
+
+      console.log(this.impactedIssues[index], "this.impactedIssues");
     },
     deadlineFun() {
       if (this.date == null || this.time == null) {
@@ -689,114 +735,32 @@ export default {
 
       return this.happeningDate + " " + this.incidentHappeningTime;
     },
+    addLikedIssue() {
+      const length = this.linkedIssues.length;
+      this.linkedIssues.push(length + 1);
+    },
+    removeLikedIssue(index) {
+      this.linkedIssues.splice(index, 1);
+      this.impactedIssues.splice(index, 1);
+    },
+    impactedValue(event, index) {
+      const value = this.impactedIssues[index];
+      value.impacted = event;
+      // this.impactedIssues[index] = value;
+      //   this.linkedIssues.splice(index, 1);
+      //   this.impactedIssues.splice(index, 1);
+    },
+    next() {
+      if (!this.$refs.form.validate()) {
+        return;
+      }
+      this.step = 2;
+    },
   },
 };
 </script>
-
 <style>
-.buttons {
-  /* display: flex; */
-  /* justify-content: space-between; */
-}
-button.typeIncident.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--default {
-  width: 119%;
-}
-h5.subjects {
-  color: snow;
-  background-color: #9d9d9d;
-  width: fit-content;
-  padding: 0px 8px;
-  margin: 5px 5px;
-}
-.row.justify-space-between {
-  margin: 0px 0px;
-  width: 100%;
-}
-.rightDiv.col-md-4.col-12 {
-  margin-right: 90px;
-}
-.theme--light.v-btn.v-btn--has-bg {
-  background-color: #f5f5f5;
-}
-
-input#input-85 {
-  display: none;
-}
-.v-text-field.v-text-field--enclosed:not(.v-text-field--rounded)
-  > .v-input__control
-  > .v-input__slot,
-/* .v-text-field.v-text-field--enclosed .v-text-field__details {
-  padding: 0 12px;
-} */
-.checkbox {
-  /* display: flex; */
-  /* justify-content: flex-end; */
-  /* margin: -21px -3px; */
-}
-
-.descrition {
-  color: rgb(159 159 159);
-}
-h6 {
-  color: rgb(118 118 118);
-  margin: 2px 30px;
-  font-size: 12px;
-}
-h5 {
-  color: rgb(118 118 118);
-}
-
-.theme--light.v-input input,
-.theme--light.v-input textarea {
-  color: rgba(0, 0, 0, 0.87);
-}
-p.descrip {
-  font-size: 9px;
-  margin-bottom: 0px;
-}
-p.addAttachments {
-  padding: 10px 13px;
-  font-size: 18px;
-}
-
-.v-input.severity.v-textarea.theme--light.v-text-field.v-text-field--is-booted {
-  width: 89%;
-
-  margin-left: 8px;
-}
-textarea#input-114 {
-  height: 12px;
-}
-textarea#input-108 {
-  height: 12px;
-}
-textarea#input-102 {
-  height: 90px;
-}
-.attachments {
-  /* display: flex; */
-  /* justify-content: space-around; */
-}
-/* .addAttachments {
-  padding: 8px 0px;
-} */
-.v-text-field__slot {
-  width: 89px;
-}
-.issue {
-  /* display: flex; */
-  /* justify-content: center; */
-}
-.rightDiv.col-md-4.col-12 {
-  margin-right: 100px;
-}
-.createButtons {
-  text-transform: none;
-}
-.v-menu__content.theme--light.v-menu__content--fixed.menuable__content__active {
-  background-color: #ffffff;
-}
-.v-messages.theme--light {
-  display: none;
+p.descrition {
+  font-size: 14px;
 }
 </style>

@@ -30,7 +30,7 @@ export default {
   props: {
     assignees: {
       type: Array,
-      default: [""],
+      default: ["", ""],
     },
   },
   data() {

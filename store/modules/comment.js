@@ -44,12 +44,12 @@ const actions = {
   },
   async updateComment({ commit }, { comment, userId, incidentId }) {
     try {
-      const comment = await this.$axios.$put(
+      const commentUpdated = await this.$axios.$put(
         `/incident-management/comment/update/comment/${incidentId}`,
         { comment, userId }
       );
 
-      commit("commentUpdate", comment);
+      commit("commentUpdate", commentUpdated);
     } catch (err) {
       console.log(err);
     }

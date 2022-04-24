@@ -84,8 +84,7 @@
           + Create Incident</v-btn
         >
 
-        <testing
-          v-if="showCreateForm"
+        <CreateIncident
           :dialog.sync="showCreateForm"
           @getIncidents="getIncidents"
         />
@@ -226,6 +225,7 @@
               @click="clearFilter"
               background-color="rgb(240 240 240)"
               height="48"
+              class="text-capitalize"
               >Clear filter</v-btn
             >
           </v-col>
@@ -254,12 +254,17 @@
         single-expand
       >
         <template v-slot:[`item.responderId`]="{ item }">
-          <div v-if="activeBtn === 'responder'">
-            <ShowAssignees :assignees="item.assignees" />
-          </div>
-          <div v-if="activeBtn === 'createdByMe' || activeBtn === 'assignee'">
-            <ShowResponders :responders="item.responders" />
-          </div>
+          <v-icon @click.stop="(incidentId = item.id), (dialogIcone = true)"
+            >mdi-eye-outline
+          </v-icon>
+          <ShowUser
+            v-if="incidentId == item.id"
+            :dialogIcone.sync="dialogIcone"
+            :users="
+              activeBtn === 'responder' ? item.assignees : item.responders
+            "
+            :activeBtn="activeBtn"
+          />
         </template>
         <template #[`item.icon`]="{ item }">
           <Ellipsis
@@ -270,16 +275,20 @@
             @getIncidents="getIncidents"
           />
         </template>
-        <template v-slot:[`item.subject`]="{ value, item }">
+        <template v-slot:[`item.subject`]="{ item }">
           <div>
-            <nuxt-link
-              :to="{
-                path: '/incidentDetails?',
-                query: { incidentId: item.id },
-              }"
-              >{{ value }}</nuxt-link
+            <a
+              @click.stop="(incidentId = item.id), (showDetailsIncident = true)"
+            >
+              {{ item.subject }}</a
             >
           </div>
+          <IncidentDetails
+            v-if="incidentId == item.id"
+            :dialogDetails.sync="showDetailsIncident"
+            :incidentId="item.id"
+            :activeBtn="activeBtn"
+          />
         </template>
         <template v-slot:[`item.creatorId`]="{ item }">
           <div v-if="activeBtn === 'createdByMe'">
@@ -303,6 +312,14 @@
           {{ item.deadline ? item.deadline.split("T")[0] : "" }} at
           {{ item.deadline ? item.deadline.split("T")[1].split(".")[0] : "" }}
         </template>
+        <template v-slot:[`item.happeningTime`]="{ item }">
+          {{ item.happeningTime ? item.happeningTime.split("T")[0] : "" }} at
+          {{
+            item.happeningTime
+              ? item.happeningTime.split("T")[1].split(".")[0]
+              : ""
+          }}
+        </template>
         <template v-slot:[`item.escalationPolicy`]="{ item }">
           {{ getEscalationPolicy(item.escalationPolicy) }}
         </template>
@@ -318,12 +335,11 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import Ellipsis from "../components/IncidentsEllipsis.vue";
 export default {
-  components: { Ellipsis },
   data() {
     return {
       buttonName: "",
+      showDetailsIncident: false,
       search: "",
       headers: [],
       incidents: [],
@@ -360,6 +376,8 @@ export default {
       iddd: null,
       issue: null,
       allUsersNameById: {},
+      incidentId: null,
+      dialogIcone: false,
     };
   },
   computed: {
@@ -416,9 +434,10 @@ export default {
           align: "start",
           value: "subject",
         },
-        { text: "Impacted issue", value: "impactedIssues" },
+        { text: "Linked issue", value: "impactedIssues" },
         { text: creatorHeader, value: "creatorId" },
-        { text: "Date creation and time", value: "createdAt" },
+        { text: "Happening time", value: "happeningTime" },
+        { text: "creation time", value: "createdAt" },
         { text: "priority", value: "priority" },
         { text: "state", value: "state" },
         { text: "Deadline", value: "deadline" },

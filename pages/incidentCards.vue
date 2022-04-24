@@ -4,7 +4,7 @@
       offset-y
       close-on-click
       :close-on-content-click="false"
-      max-width="600"
+      max-width="800"
     >
       <template v-slot:activator="{ on, attrs }">
         <v-row justify="space-around">
@@ -87,23 +87,23 @@
               </v-autocomplete>
             </v-col>
 
-            <!-- <v-col cols="12" md="1">
-              <v-btn class="btn-result">Results</v-btn>
+            <v-col>
+              <v-btn class="btn-reset" @click="clearFilter">Clear</v-btn>
             </v-col>
-            <v-col cols="12" md="1">
-              <v-btn class="btn-reset">Claer</v-btn>
-            </v-col> -->
           </v-row>
         </v-toolbar>
         <v-icon large @click="goToIncidentPage"> mdi-open-in-new </v-icon>
       </v-container>
       <div>
-        <v-btn
-          @click.stop="showCreateForm = true"
-          color="#272727"
-          class="resetBtn"
-          >Create</v-btn
-        >
+        <!-- <div class="d-flex justify-end mr-8">
+          <v-btn
+            color="#272727"
+            class="pa-4 ma-4 text-capitalize white--text"
+            @click.stop="showCreateForm = true"
+          >
+            Create</v-btn
+          >
+        </div> -->
 
         <CreateIncident
           v-if="showCreateForm"
@@ -146,12 +146,19 @@
             >
               reporting on</v-btn
             >
+            <v-btn
+              color="#272727"
+              class="pa-4 ml-16 text-capitalize white--text"
+              @click.stop="showCreateForm = true"
+            >
+              Create</v-btn
+            >
           </div>
         </v-row>
       </div>
       <v-list v-for="(incident, index) in showIncidents" :key="index">
         <v-list-item>
-          <v-card elevation="2" width="600" height="100">
+          <v-card elevation="2" width="800" height="100">
             <v-row>
               <v-col cols="6">
                 <v-card-text style="height: 25px">
@@ -159,7 +166,24 @@
                     Creator :{{ allUsersNameById[incident.creatorId] }}
                   </div>
                   <div v-if="activeBtn === 'createdByMe'">
-                    Assignee :<ShowAssignees :assignees="incident.assignees" />
+                    <v-icon
+                      @click.stop="
+                        (incidentId = incident.id), (dialogIcone = true)
+                      "
+                      >mdi-eye-outline
+                    </v-icon>
+                    <!-- Assignee :<ShowAssignees :assignees="incident.assignees" /> -->
+                    Assignee:
+                    <ShowUser
+                      v-if="incidentId == incident.id"
+                      :dialogIcone.sync="dialogIcone"
+                      :users="
+                        activeBtn === 'responder'
+                          ? incident.assignees
+                          : incident.responders
+                      "
+                      :activeBtn="activeBtn"
+                    />
                   </div>
                   <!-- <div v-if="incident.CreatorId == userId && !showAssigneeToMe">
                     Assignee :{{ userData.name }}
@@ -167,13 +191,27 @@
                 </v-card-text>
 
                 <v-card-text style="height: 25px">
-                  <nuxt-link
+                  <div>
+                    <a
+                      @click.stop="
+                        (incidentId = incident.id), (showDetailsIncident = true)
+                      "
+                    >
+                      {{ incident.subject }}</a
+                    >
+                  </div>
+                  <IncidentDetails
+                    v-if="incidentId == incident.id"
+                    :dialogDetails.sync="showDetailsIncident"
+                    :incidentId="incident.id"
+                  />
+                  <!-- <nuxt-link
                     :to="{
                       path: '/incidentDetails?',
                       query: { incidentId: incident.id },
                     }"
                     >{{ incident.subject }}</nuxt-link
-                  >
+                  > -->
                 </v-card-text>
 
                 <v-card-text style="height: 25px">
@@ -235,6 +273,8 @@ import { mapGetters, mapActions } from "vuex";
 export default {
   data() {
     return {
+      showDetailsIncident: false,
+      incidentId: null,
       valueFilter: "",
       creatorId: null,
       priorityFilter: ["High", "Medium", "Low"],
