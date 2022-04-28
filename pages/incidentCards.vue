@@ -4,7 +4,7 @@
       offset-y
       close-on-click
       :close-on-content-click="false"
-      max-width="800"
+      max-width="700"
     >
       <template v-slot:activator="{ on, attrs }">
         <v-row justify="space-around">
@@ -95,16 +95,6 @@
         <v-icon large @click="goToIncidentPage"> mdi-open-in-new </v-icon>
       </v-container>
       <div>
-        <!-- <div class="d-flex justify-end mr-8">
-          <v-btn
-            color="#272727"
-            class="pa-4 ma-4 text-capitalize white--text"
-            @click.stop="showCreateForm = true"
-          >
-            Create</v-btn
-          >
-        </div> -->
-
         <CreateIncident
           v-if="showCreateForm"
           :dialog.sync="showCreateForm"
@@ -137,10 +127,10 @@
               Created by me</v-btn
             >
             <v-btn
-              :outlined="activeBtn === 'responder'"
+              :outlined="activeBtn === 'reporter'"
               color="indigo accent-2"
               elevation="2"
-              :plain="activeBtn !== 'responder'"
+              :plain="activeBtn !== 'reporter'"
               @click="getIncidentResponder"
               class="textBtu"
             >
@@ -156,127 +146,137 @@
           </div>
         </v-row>
       </div>
-      <v-list v-for="(incident, index) in showIncidents" :key="index">
-        <v-list-item>
-          <v-card elevation="2" width="800" height="100">
-            <v-row>
-              <v-col cols="6">
-                <v-card-text style="height: 25px">
-                  <div v-if="activeBtn === 'assignee'">
-                    Creator :{{ allUsersNameById[incident.creatorId] }}
-                  </div>
-                  <div v-if="activeBtn === 'createdByMe'">
-                    <v-icon
-                      @click.stop="
-                        (incidentId = incident.id), (dialogIcone = true)
-                      "
-                      >mdi-eye-outline
-                    </v-icon>
-                    <!-- Assignee :<ShowAssignees :assignees="incident.assignees" /> -->
-                    Assignee:
-                    <ShowUser
-                      v-if="incidentId == incident.id"
-                      :dialogIcone.sync="dialogIcone"
-                      :users="
-                        activeBtn === 'responder'
-                          ? incident.assignees
-                          : incident.responders
-                      "
-                      :activeBtn="activeBtn"
-                    />
-                  </div>
-                  <!-- <div v-if="incident.CreatorId == userId && !showAssigneeToMe">
-                    Assignee :{{ userData.name }}
-                  </div> -->
-                </v-card-text>
 
-                <v-card-text style="height: 25px">
-                  <div>
-                    <a
-                      @click.stop="
-                        (incidentId = incident.id), (showDetailsIncident = true)
-                      "
-                    >
-                      {{ incident.subject }}</a
-                    >
-                  </div>
-                  <IncidentDetails
-                    v-if="incidentId == incident.id"
-                    :dialogDetails.sync="showDetailsIncident"
-                    :incidentId="incident.id"
-                  />
-                  <!-- <nuxt-link
-                    :to="{
-                      path: '/incidentDetails?',
-                      query: { incidentId: incident.id },
-                    }"
-                    >{{ incident.subject }}</nuxt-link
-                  > -->
-                </v-card-text>
+      <div v-if="!showIncidents.length">
+        <v-card height="50" class="grey--text pt-3 d-flex justify-center"
+          >Nothing Data</v-card
+        >
+      </div>
+      <div v-else>
+        <v-list v-for="(incident, index) in showIncidents" :key="index">
+          <v-list-item>
+            <v-card elevation="2" width="800" height="120">
+              <div class="rowCards">
+                <v-row>
+                  <v-col cols="6" style="height: 25px">
+                    <v-card-text style="height: 25px">
+                      <!-- <div v-if="activeBtn === 'assignee'">
+                        Creator :{{ allUsersNameById[incident.creatorId] }}
+                      </div> -->
+                      <div v-if="activeBtn === 'createdByMe'">
+                        Assignee :<ShowAssignees
+                          :assignees="incident.assignees"
+                        />
+                      </div>
+                      <div v-else>
+                        Creator :{{ allUsersNameById[incident.creatorId] }}
+                      </div>
 
-                <v-card-text style="height: 25px">
-                  {{
-                    incident.createdAt ? incident.createdAt.split("T")[0] : ""
-                  }}
-                  at
-                  {{
-                    incident.createdAt
-                      ? incident.createdAt.split("T")[1].split(".")[0]
-                      : ""
-                  }}
-                </v-card-text>
-              </v-col>
-              <v-col cols="5">
-                <!-- <v-card-text style="height: 25px">
+                      <!-- <div v-if="activeBtn === 'reporter'">
+                        Reporter :
+                        <v-icon
+                          @click.stop="
+                            (incidentId = incident.id), (dialogIcone = true)
+                          "
+                          >mdi-eye-outline
+                        </v-icon>
+                        <ShowUser
+                          v-if="incidentId == incident.id"
+                          :dialogIcone.sync="dialogIcone"
+                          :users="incident.responders"
+                          :activeBtn="activeBtn"
+                        />
+                      </div> -->
+                    </v-card-text>
+
+                    <v-card-text style="height: 25px">
+                      <div>
+                        <a
+                          @click.stop="
+                            (incidentId = incident.id),
+                              (showDetailsIncident = true)
+                          "
+                        >
+                          {{ incident.subject }}</a
+                        >
+                      </div>
+                      <IncidentDetails
+                        v-if="incidentId == incident.id"
+                        :dialogDetails.sync="showDetailsIncident"
+                        :incidentId="incident.id"
+                        :activeBtn="activeBtn"
+                      />
+                    </v-card-text>
+
+                    <v-card-text style="height: 25px">
+                      {{
+                        incident.createdAt
+                          ? incident.createdAt.split("T")[0]
+                          : ""
+                      }}
+                      at
+                      {{
+                        incident.createdAt
+                          ? incident.createdAt.split("T")[1].split(".")[0]
+                          : ""
+                      }}
+                    </v-card-text>
+                  </v-col>
+                  <v-col cols="5">
+                    <!-- <v-card-text style="height: 25px">
                   Activity status :
                 </v-card-text> -->
-                <v-card-text style="height: 25px"
-                  >State :{{ incident.state }}
-                </v-card-text>
+                    <v-card-text style="height: 25px"
+                      >State :{{ incident.state }}
+                    </v-card-text>
 
-                <v-card-text style="height: 25px"
-                  >Priority :{{ incident.priority }}
-                </v-card-text>
+                    <v-card-text style="height: 25px"
+                      >Priority :{{ incident.priority }}
+                    </v-card-text>
 
-                <v-card-text style="height: 25px">
-                  Deadline :{{
-                    incident.deadline ? incident.deadline.split("T")[0] : ""
-                  }}
-                  at
-                  {{
-                    incident.deadline
-                      ? incident.deadline.split("T")[1].split(".")[0]
-                      : ""
-                  }}</v-card-text
-                >
-              </v-col>
-              <v-col cols="1">
-                <Ellipsis
-                  v-if="showEllipsis"
-                  :creatorIdProps="incident.creatorId"
-                  :activeBtn="activeBtn"
-                  :itemProps="incident"
-                  :incidentIdProps="incident.id"
-                  @getIncidents="getIncidents"
-                />
-              </v-col>
-            </v-row>
-          </v-card>
-        </v-list-item>
-      </v-list>
+                    <v-card-text style="height: 25px">
+                      Deadline :{{
+                        incident.deadline ? incident.deadline.split("T")[0] : ""
+                      }}
+                      at
+                      {{
+                        incident.deadline
+                          ? incident.deadline.split("T")[1].split(".")[0]
+                          : ""
+                      }}</v-card-text
+                    >
+                  </v-col>
+                  <v-col cols="1">
+                    <Ellipsis
+                      v-if="showEllipsis"
+                      :creatorIdProps="incident.creatorId"
+                      :activeBtn="activeBtn"
+                      :itemProps="incident"
+                      :incidentIdProps="incident.id"
+                      @getIncidents="getIncidents"
+                    />
+                  </v-col>
+                </v-row>
+              </div>
+            </v-card>
+          </v-list-item>
+        </v-list>
+      </div>
     </v-menu>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import Test from "../components/Test.vue";
+import Test222 from "./test222.vue";
 export default {
+  components: { Test, Test222 },
   data() {
     return {
       showDetailsIncident: false,
       incidentId: null,
       valueFilter: "",
-      creatorId: null,
       priorityFilter: ["High", "Medium", "Low"],
       showIncidents: [],
       allUsersNameById: {},
@@ -292,7 +292,6 @@ export default {
         "Closed (preventive)",
       ],
       userId: null,
-      //
       creatorFilter: [],
       creatorId: "",
       itemNames: [],
@@ -306,6 +305,7 @@ export default {
       showCreateForm: false,
       subjectsIncident: [],
       dialogIcone: false,
+      message: "",
     };
   },
   computed: {
@@ -393,6 +393,10 @@ export default {
     },
     filterCreatorName(value) {
       this.filterIncidents("creatorId", +this.creatorId);
+      if (!this.filterIncidents) {
+        this.message = "Nothing data";
+      }
+      console.log(this.message, "this.messagethis.message");
     },
     getIncidentCreatedByMe() {
       this.showAssigneeToMe = false;
@@ -405,7 +409,7 @@ export default {
       this.showIncidents = this.allIncidentsAssigneeToMe;
     },
     getIncidentResponder() {
-      this.activeBtn = "responder";
+      this.activeBtn = "reporter";
       this.showIncidents = this.incidentsResponder;
     },
 
@@ -444,5 +448,9 @@ export default {
 .contain {
   display: flex;
   justify-content: space-between;
+}
+.rowCards {
+  border: solid 2px #3daea3;
+  height: 100%;
 }
 </style>

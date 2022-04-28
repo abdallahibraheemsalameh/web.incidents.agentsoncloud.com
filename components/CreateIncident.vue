@@ -304,8 +304,7 @@
                       </template>
                     </div>
                   </div>
-
-                  <v-autocomplete
+                  <v-select
                     v-model="assignee"
                     :items="allUsers"
                     multiple
@@ -314,7 +313,27 @@
                     :rules="assigneeRules"
                     label="assignee"
                     background-color="#ffffff"
-                  ></v-autocomplete>
+                  >
+                    <template v-slot:selection="data">
+                      <v-chip
+                        :key="JSON.stringify(data.item)"
+                        v-bind="data.attrs"
+                        :input-value="data.selected"
+                        :disabled="data.disabled"
+                        @click:close="data.parent.selectItem(data.item)"
+                      >
+                        <v-avatar
+                          class="accent white--text"
+                          left
+                          v-text="
+                            String(data.item.name).slice(0, 1).toUpperCase()
+                          "
+                        ></v-avatar>
+                        {{ data.item.name }}
+                      </v-chip>
+                    </template>
+                  </v-select>
+
                   <v-autocomplete
                     v-model="secondaryAssignee"
                     :items="allUsers"
@@ -323,7 +342,8 @@
                     label="Secondary assignee"
                     background-color="#ffffff"
                   ></v-autocomplete>
-                  <v-autocomplete
+
+                  <v-select
                     v-model="responder"
                     :items="allUsers"
                     multiple
@@ -331,7 +351,26 @@
                     item-value="id"
                     label="responder"
                     background-color="#ffffff"
-                  ></v-autocomplete>
+                  >
+                    <template v-slot:selection="data">
+                      <v-chip
+                        :key="JSON.stringify(data.item)"
+                        v-bind="data.attrs"
+                        :input-value="data.selected"
+                        :disabled="data.disabled"
+                        @click:close="data.parent.selectItem(data.item)"
+                      >
+                        <v-avatar
+                          class="accent white--text"
+                          left
+                          v-text="
+                            String(data.item.name).slice(0, 1).toUpperCase()
+                          "
+                        ></v-avatar>
+                        {{ data.item.name }}
+                      </v-chip>
+                    </template>
+                  </v-select>
                 </v-col>
               </v-row>
             </v-card>
@@ -599,6 +638,7 @@ export default {
     this.subjectsIncident = this.allIncident.map((incident) => {
       return incident.subject;
     });
+    this.deadline = "css";
   },
   watch: {},
   methods: {
@@ -751,9 +791,20 @@ export default {
       //   this.impactedIssues.splice(index, 1);
     },
     next() {
-      if (!this.$refs.form.validate()) {
+      console.log(this.$refs.form, "this.$refs.form.validate()v");
+      // if (!this.$refs.form.validate()) {
+      //   console.log(" this.deadline this.deadline", this.deadline);
+      //   return;
+      // }
+
+      if (
+        (!this.subject && !this.subject.length) ||
+        !this.description ||
+        !this.assignee
+      ) {
         return;
       }
+      console.log(this.step, "this.stepthis.step");
       this.step = 2;
     },
   },

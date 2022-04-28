@@ -2,7 +2,9 @@
   <div class="text-center">
     <v-menu top :offset-x="offset">
       <template v-slot:activator="{ on, attrs }">
-        <v-icon v-bind="attrs" v-on="on">mdi-dots-vertical </v-icon>
+        <v-icon v-bind="attrs" v-on="on" color="#3daea3"
+          >mdi-dots-vertical
+        </v-icon>
       </template>
 
       <!-- Creator -->
@@ -16,6 +18,7 @@
                 v-if="showCreateForm"
                 :dialog.sync="showCreateForm"
                 :incidentId="incidentIdProps"
+                @getIncidents="getIncidents"
               />
             </div>
           </v-list-item-title>

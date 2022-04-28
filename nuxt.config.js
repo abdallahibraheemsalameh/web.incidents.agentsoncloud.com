@@ -76,6 +76,10 @@ export default {
       target: "https://62270c622dfa52401812e5c0.mockapi.io",
       pathRewrite: { "^/suppliers-management/": "" },
     },
+    "/comments/": {
+      target: "https://api.tasks.agentsoncloud.com/",
+      pathRewrite: { "^/comments/": "" },
+    },
   },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify

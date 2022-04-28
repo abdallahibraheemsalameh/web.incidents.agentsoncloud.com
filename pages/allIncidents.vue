@@ -24,10 +24,10 @@
           Created by me</v-btn
         >
         <v-btn
-          :outlined="activeBtn === 'responder'"
+          :outlined="activeBtn === 'reporter'"
           color="indigo accent-2"
           elevation="2"
-          :plain="activeBtn !== 'responder'"
+          :plain="activeBtn !== 'reporter'"
           @click="incidentResponder"
           class="textBtu"
         >
@@ -233,102 +233,116 @@
       </v-toolbar>
     </v-container>
     <!-- </div> -->
+    {{ howShow }}
 
     <template>
       <div class="mx-8">
         <v-text-field
-          class="mt-0 pt-0"
           v-model="search"
           append-icon="mdi-magnify"
           label="Search"
           single-line
           hide-details
         ></v-text-field>
-      </div>
-      <!-- {{ showIncidents }} -->
-      <v-data-table
-        :headers="headers"
-        :items="showIncidents"
-        :search="search"
-        show-expand
-        single-expand
-      >
-        <template v-slot:[`item.responderId`]="{ item }">
-          <v-icon @click.stop="(incidentId = item.id), (dialogIcone = true)"
-            >mdi-eye-outline
-          </v-icon>
-          <ShowUser
-            v-if="incidentId == item.id"
-            :dialogIcone.sync="dialogIcone"
-            :users="
-              activeBtn === 'responder' ? item.assignees : item.responders
-            "
-            :activeBtn="activeBtn"
-          />
-        </template>
-        <template #[`item.icon`]="{ item }">
-          <Ellipsis
-            :creatorIdProps="item.creatorId"
-            :activeBtn="activeBtn"
-            :incidentIdProps="item.id"
-            :itemProps="item"
-            @getIncidents="getIncidents"
-          />
-        </template>
-        <template v-slot:[`item.subject`]="{ item }">
-          <div>
-            <a
-              @click.stop="(incidentId = item.id), (showDetailsIncident = true)"
-            >
-              {{ item.subject }}</a
-            >
-          </div>
-          <IncidentDetails
-            v-if="incidentId == item.id"
-            :dialogDetails.sync="showDetailsIncident"
-            :incidentId="item.id"
-            :activeBtn="activeBtn"
-          />
-        </template>
-        <template v-slot:[`item.creatorId`]="{ item }">
-          <div v-if="activeBtn === 'createdByMe'">
-            <ShowAssignees :assignees="item.assignees" />
-          </div>
-          <div v-if="activeBtn === 'assignee'">
-            {{ allUsersNameById[item.creatorId] }}
-          </div>
-        </template>
 
-        <template v-slot:[`item.impactedIssues`]="{ item }">
-          <div
-            v-for="impactedIssue in item.ImpactedIssues"
-            :key="impactedIssue.id"
-          >
-            {{ impactedIssue.name }}/
-            {{ impactedIssue.IncidentImpactedIssue.item }}
-          </div>
-        </template>
-        <template v-slot:[`item.deadline`]="{ item }">
-          {{ item.deadline ? item.deadline.split("T")[0] : "" }} at
-          {{ item.deadline ? item.deadline.split("T")[1].split(".")[0] : "" }}
-        </template>
-        <template v-slot:[`item.happeningTime`]="{ item }">
-          {{ item.happeningTime ? item.happeningTime.split("T")[0] : "" }} at
-          {{
-            item.happeningTime
-              ? item.happeningTime.split("T")[1].split(".")[0]
-              : ""
-          }}
-        </template>
-        <template v-slot:[`item.escalationPolicy`]="{ item }">
-          {{ getEscalationPolicy(item.escalationPolicy) }}
-        </template>
-        <template v-slot:[`item.createdAt`]="{ item }">
-          {{ item.createdAt ? item.createdAt.split("T")[0] : "" }} at
-          {{ item.createdAt ? item.createdAt.split("T")[1].split(".")[0] : "" }}
-        </template>
-      </v-data-table>
-      <!-- </v-card> -->
+        <v-data-table
+          :headers="headers"
+          :items="showIncidents"
+          :search="search"
+        >
+          <template v-slot:[`item.responderId`]="{ item }">
+            <v-icon
+              @click.stop="
+                (incidentId = item.id), showReporter(), (dialogIcone = true)
+              "
+              >mdi-eye-outline
+            </v-icon>
+            <ShowUser
+              v-if="incidentId == item.id"
+              :dialogIcone.sync="dialogIcone"
+              :users="
+                activeBtn === 'reporter' ? item.assignees : item.responders
+              "
+              :activeBtn="activeBtn"
+              :howShow="howShow"
+            />
+          </template>
+          <template #[`item.icon`]="{ item }">
+            <Ellipsis
+              :creatorIdProps="item.creatorId"
+              :activeBtn="activeBtn"
+              :incidentIdProps="item.id"
+              :itemProps="item"
+              @getIncidents="getIncidents"
+            />
+          </template>
+          <template v-slot:[`item.subject`]="{ item }">
+            <div>
+              <a
+                @click.stop="
+                  (incidentId = item.id), (showDetailsIncident = true)
+                "
+              >
+                {{ item.subject }}</a
+              >
+            </div>
+            <IncidentDetails
+              v-if="incidentId == item.id"
+              :dialogDetails.sync="showDetailsIncident"
+              :incidentId="item.id"
+              :activeBtn="activeBtn"
+            />
+          </template>
+          <template v-slot:[`item.creatorId`]="{ item }">
+            <div v-if="activeBtn === 'createdByMe'">
+              <v-icon
+                @click.stop="
+                  (incidentId = item.id), showAssignee(), (dialogIcone = true)
+                "
+                >mdi-eye-outline
+              </v-icon>
+              <ShowUser
+                v-if="incidentId == item.id"
+                :dialogIcone.sync="dialogIcone"
+                :users="item.assignees"
+                :activeBtn="activeBtn"
+                :howShow="howShow"
+              />
+            </div>
+            <div v-if="activeBtn === 'assignee'">
+              {{ allUsersNameById[item.creatorId] }}
+            </div>
+          </template>
+
+          <template v-slot:[`item.impactedIssues`]="{ item }">
+            <div v-for="(impactedIssue, i) in item.ImpactedIssues" :key="i">
+              {{ impactedIssue.name }}/
+              {{ impactedIssue.IncidentImpactedIssue.item }}
+            </div>
+          </template>
+          <template v-slot:[`item.deadline`]="{ item }">
+            {{ item.deadline ? item.deadline.split("T")[0] : "" }} at
+            {{ item.deadline ? item.deadline.split("T")[1].split(".")[0] : "" }}
+          </template>
+          <template v-slot:[`item.happeningTime`]="{ item }">
+            {{ item.happeningTime ? item.happeningTime.split("T")[0] : "" }} at
+            {{
+              item.happeningTime
+                ? item.happeningTime.split("T")[1].split(".")[0]
+                : ""
+            }}
+          </template>
+          <template v-slot:[`item.escalationPolicy`]="{ item }">
+            {{ getEscalationPolicy(item.escalationPolicy) }}
+          </template>
+          <template v-slot:[`item.createdAt`]="{ item }">
+            {{ item.createdAt ? item.createdAt.split("T")[0] : "" }} at
+            {{
+              item.createdAt ? item.createdAt.split("T")[1].split(".")[0] : ""
+            }}
+          </template>
+        </v-data-table>
+      </div>
     </template>
   </div>
 </template>
@@ -345,6 +359,7 @@ export default {
       incidents: [],
       name: "Noof",
       activeBtn: "assignee",
+      howShow: "assignee",
       showCreateForm: false,
       items: ["Update", "update escalation duration", "Add comment", "Delete"],
       value: "",
@@ -390,7 +405,6 @@ export default {
       "allInventories",
       "allFacilities",
       "allSuppliers",
-      // "responderData",
       "incidentsResponder",
       "userData",
     ]),
@@ -412,7 +426,6 @@ export default {
     this.getAllFacility();
     this.getAllSuppliers();
     this.userNameById();
-    // this.responders = this.responderData;
   },
   methods: {
     ...mapActions([
@@ -486,8 +499,11 @@ export default {
     },
     incidentResponder() {
       this.getHeaders("Creator", "Assignee");
-
-      this.activeBtn = "responder";
+      console.log(
+        this.incidentsResponder,
+        "this.showIncidentsthis.showIncidentsthis.showIncidentsthis.showIncidents"
+      );
+      this.activeBtn = "reporter";
       this.showIncidents = this.incidentsResponder;
     },
     filterIncidents(key, value) {
@@ -553,6 +569,13 @@ export default {
       this.allUsers.forEach((user) => {
         this.allUsersNameById[user.id] = user.name;
       });
+    },
+    showAssignee() {
+      this.howShow = "";
+      this.howShow = "assignee";
+    },
+    showReporter() {
+      this.howShow = "reporter";
     },
   },
 };

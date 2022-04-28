@@ -293,13 +293,32 @@
                   <v-select
                     v-model="assignee"
                     :items="allUsers"
-                    multiple
                     item-text="name"
                     item-value="id"
                     :rules="assigneeRules"
-                    label="assignee"
                     background-color="#ffffff"
+                    label="assignee"
+                    multiple
+                    chips
                   >
+                    <template v-slot:selection="data">
+                      <v-chip
+                        :key="JSON.stringify(data.item)"
+                        v-bind="data.attrs"
+                        :input-value="data.selected"
+                        :disabled="data.disabled"
+                        @click:close="data.parent.selectItem(data.item)"
+                      >
+                        <v-avatar
+                          class="accent white--text"
+                          left
+                          v-text="
+                            String(data.item.name).slice(0, 1).toUpperCase()
+                          "
+                        ></v-avatar>
+                        {{ data.item.name }}
+                      </v-chip>
+                    </template>
                   </v-select>
                   <v-select
                     v-model="secondaryAssignee"
@@ -309,15 +328,36 @@
                     label="Secondary assignee"
                     background-color="#ffffff"
                   ></v-select>
-                  <v-select
+
+                  <v-combobox
                     v-model="responder"
                     :items="allUsers"
                     multiple
+                    chips
                     item-text="name"
                     item-value="id"
                     label="responder"
                     background-color="#ffffff"
-                  ></v-select>
+                  >
+                    <template v-slot:selection="data">
+                      <v-chip
+                        :key="JSON.stringify(data.item)"
+                        v-bind="data.attrs"
+                        :input-value="data.selected"
+                        :disabled="data.disabled"
+                        @click:close="data.parent.selectItem(data.item)"
+                      >
+                        <v-avatar
+                          class="accent white--text"
+                          left
+                          v-text="
+                            String(data.item.name).slice(0, 1).toUpperCase()
+                          "
+                        ></v-avatar>
+                        {{ data.item.name }}
+                      </v-chip>
+                    </template>
+                  </v-combobox>
                 </v-col>
               </v-row>
             </v-card>
@@ -613,6 +653,8 @@ export default {
         this.uploadImage();
       };
       reader.readAsDataURL(fileObject);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
     },
     uploadImage() {
       const { image } = this;
@@ -628,6 +670,8 @@ export default {
       "getIncidentsDetails",
       "updateIncidentById",
       "getIncidentByAssigneeToMe",
+      "getIncidentsCreatedByMe",
+      "updateAttachment",
     ]),
 
     handelImpact(impactValue) {
@@ -651,7 +695,6 @@ export default {
         impactLevel: this.impactLevel,
         impactDescription: this.impactDescription,
         state: this.state,
-        // referenceId: this.referenceId,
         deadline: this.deadlineFun(),
         secondaryAssignee: this.secondaryAssignee,
         happeningTime: this.handelIncidentHappeningTime(),
@@ -671,14 +714,16 @@ export default {
 
       if (this.files.length) {
         const formData = new FormData();
+        console.log(file, file.name, "llllllllllllllllllllllllll");
         for (let file of this.files) {
           formData.append("files", file, file.name);
         }
         formData.append("incidentId", response.id);
-        this.createAttachment(formData);
+        this.updateAttachment(1, formData);
       }
       this.getIncidentByAssigneeToMe(this.userId);
       this.$emit("update:dialog", false);
+      this.$emit("getIncidents");
     },
 
     impactFinancialFun() {
@@ -753,13 +798,6 @@ export default {
 button.typeIncident.v-btn.v-btn--is-elevated.v-btn--has-bg.theme--light.v-size--default {
   width: 119%;
 }
-h5.subjects {
-  color: snow;
-  background-color: #9d9d9d;
-  width: fit-content;
-  padding: 0px 8px;
-  margin: 5px 5px;
-}
 
 .create {
   background-color: #e0e0de;
@@ -806,9 +844,7 @@ h6 {
   margin: 2px 30px;
   font-size: 12px;
 }
-h5 {
-  color: rgb(118 118 118);
-}
+
 .task {
 }
 

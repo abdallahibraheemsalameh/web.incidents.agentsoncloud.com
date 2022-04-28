@@ -8,7 +8,7 @@
   >
     <v-card class="pa-4">
       <div class="ml-4" v-if="!users || users.length === 0">
-        {{ message }}
+        {{ message }}{{ howShow }}
       </div>
       <h5 v-else>{{ title }}:</h5>
       <div v-for="(user, i) in userNames" :key="i">
@@ -35,12 +35,16 @@ export default {
       type: String,
       default: "",
     },
+    howShow: {
+      type: String,
+      default: "",
+    },
   },
   data() {
     return {
       userNames: [],
       message: "",
-      title: "Responders",
+      title: "Reporters",
     };
   },
   mounted() {
@@ -48,18 +52,30 @@ export default {
   },
   methods: {
     usersByIncidentId() {
+      console.log(
+        this.users,
+        "kk",
+        this.howShow,
+        "this.usersthis.usersthis.userswwwwwwwwwwwwwwww"
+      );
       if (!this.users.length) {
         this.message = `There is no ${
-          this.activeBtn === "responder" ? "assignees" : "responders"
+          this.activeBtn === "createdByMe" && this.howShow == "assignee"
+            ? "assignees"
+            : "Reporters"
         } for this incident`;
-        this.title =
-          this.activeBtn === "responder" ? "Assignees" : "Responders";
+        this.message = `There is no ${
+          this.activeBtn === "reporter" ? "assignees" : "Reporters"
+        } for this incident`;
       }
+
+      this.title = this.activeBtn === "reporter" ? "Assignees" : "Reporters";
+
       console.log(
         "moooooo",
         this.activeBtn,
         this.users,
-        this.activeBtn === "responder"
+        this.activeBtn === "reporter"
       );
       this.userNames = this.users.map((user) => {
         return user.name;

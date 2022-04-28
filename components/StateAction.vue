@@ -26,9 +26,19 @@
             class="pa-4"
           ></v-text-field>
         </v-form>
-
-        <v-btn color="primary" text @click="updateState()"> submit </v-btn>
-        <v-btn color="primary" text @click="cancel"> cancel </v-btn>
+        <div class="d-flex justify-end">
+          <v-btn
+            color="primary"
+            class="text-capitalize"
+            text
+            @click="updateState()"
+          >
+            submit
+          </v-btn>
+          <v-btn color="primary" class="text-capitalize" text @click="cancel">
+            cancel
+          </v-btn>
+        </div>
       </v-card>
     </v-dialog>
   </span>

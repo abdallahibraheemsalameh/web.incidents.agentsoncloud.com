@@ -31,7 +31,7 @@
         </div>
       </template>
       <template v-slot:[`item.creatorId`]>
-        {{ creator.name }}
+        {{}}
       </template>
       <template v-slot:[`item.createdAt`]="{ item }">
         {{ item.createdAt ? item.createdAt.split("T")[0] : "" }} at

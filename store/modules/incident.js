@@ -81,7 +81,7 @@ const actions = {
     const id = localStorage.getItem("userId");
     try {
       const incidents = await this.$axios.$get(
-        `/incident-management/incident/${id}`
+        `/incident-management/incident/creator/${id}`
       );
       console.log("CreatedByMeCreatedByMe", incidents);
       commit("setIncidentsCreatedByMe", incidents);
@@ -143,7 +143,7 @@ const actions = {
 
   async getIncidentHistory({ commit }) {
     try {
-      const incidentHistory = await this.$axios.$post(
+      const incidentHistory = await this.$axios.$get(
         `/incident-management/incident/history`
       );
       commit("setIncidentHistory", incidentHistory);
@@ -154,7 +154,7 @@ const actions = {
   async updateIncidentById({ commit }, { id, body }) {
     console.log("loggg", id, body);
     try {
-      const incident = await this.$axios.$patch(
+      const incident = await this.$axios.$put(
         `/incident-management/incident/${id}`,
 
         body

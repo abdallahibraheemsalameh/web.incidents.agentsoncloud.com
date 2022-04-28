@@ -34,7 +34,7 @@
                 </v-col>
               </div> -->
             </v-col>
-            <v-col v-else>{{ value[1] }}</v-col>
+            <v-col v-else>{{ value[1] }} </v-col>
             <v-col>
               Happened on
               <div class="Happened">
@@ -48,28 +48,6 @@
         </div>
       </v-card>
     </div>
-    <!-- <div v-for="log in activityLog" :key="log.id">
-        <div
-          v-for="(value, index) in Object.entries(log.oldValue)"
-          :key="index"
-        >
-          <div class="d-flex">
-            <div>{{ allUsersNameById[userId] }} Change</div>
-            <div class="pa-8">{{ value[0] }}</div>
-            <div class="pa-8">{{ value[1] }}</div>
-            <v-icon x-large color="rgb(148 148 148)" size="400">
-              mdi-arrow-right</v-icon
-            >
-          </div>
-          <div
-            class="pa-8"
-            v-for="(value, index) in Object.entries(log.newValue)"
-            :key="index"
-          >
-            {{ value[1] }}
-          </div>
-        </div> -->
-    <!-- </div> -->
 
     <!-- <v-data-table
       :headers="headers"

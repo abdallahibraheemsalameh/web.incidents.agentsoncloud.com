@@ -1,7 +1,38 @@
 <template>
-  <v-card class="mx-auto" max-width="400" tile>
-    <v-list-item>
-      <v-list-item-content>ccccccccccccccccccc </v-list-item-content>
-    </v-list-item>
-  </v-card>
+  <div>
+    <div class="d-flex">
+      <v-checkbox v-model="readonly" label="Readonly"></v-checkbox>
+    </div>
+
+    <v-expansion-panels v-model="panel" :readonly="readonly" multiple>
+      <v-expansion-panel>
+        <div>
+          <v-expansion-panel-title>Panel 1</v-expansion-panel-title>
+          <v-icon @click="readonly = !readonly">mdi-chevron-down</v-icon>
+        </div>
+        <v-expansion-panel-text v-if="readonly">
+          Some content
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+
+      <v-expansion-panel>
+        <v-expansion-panel-title>Panel 2</v-expansion-panel-title>
+        <v-expansion-panel-text> Some content </v-expansion-panel-text>
+      </v-expansion-panel>
+
+      <v-expansion-panel>
+        <v-expansion-panel-title>Panel 3</v-expansion-panel-title>
+        <v-expansion-panel-text> Some content </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+  </div>
 </template>
+
+<script>
+export default {
+  data: () => ({
+    panel: [0, 1],
+    readonly: false,
+  }),
+};
+</script>

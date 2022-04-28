@@ -2,6 +2,7 @@
 const state = {
   attachment: {},
   attachments: [],
+  attachmentUpdated: [],
 };
 const getters = {
   newAttachment(state) {
@@ -9,6 +10,9 @@ const getters = {
   },
   attachments(state) {
     return state.attachments;
+  },
+  attachmentUpdated(state) {
+    return state.attachmentUpdated;
   },
 };
 const actions = {
@@ -21,6 +25,19 @@ const actions = {
       );
       console.log(attachmentCreated, "attachmentCreated");
       commit("setAttachment", attachmentCreated);
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  async updateAttachment({ commit }, id, formData) {
+    console.log("{updaaaaaaaat }", formData);
+    try {
+      const attachmentUpdated = await this.$axios.$put(
+        `/incident-management/attachment/${id}`,
+        formData
+      );
+      console.log(attachmentUpdated, "attachmentUpdated");
+      commit("attachment", attachmentUpdated);
     } catch (err) {
       console.log(err);
     }
@@ -39,6 +56,8 @@ const actions = {
 const mutations = {
   setAttachment: (state, attachment) => (state.attachment = attachment),
   allAttachments: (state, attachments) => (state.attachments = attachments),
+  attachment: (state, attachmentUpdated) =>
+    (state.attachmentUpdated = attachmentUpdated),
 };
 export default {
   state,

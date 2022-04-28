@@ -9,17 +9,16 @@
       persistent
       overlay-color="#ffffff"
       overlay-opacity="0.90"
-      max-width="600px"
     >
-      <v-card>
-        <v-list-item-title>
-          those are assignees in this incident
-        </v-list-item-title>
+      <v-card class="pa-4">
+        <div>Assignees:</div>
         <div v-for="(user, i) in assigneeNames" :key="i">
-          <v-list-item-subtitle>{{ user }}</v-list-item-subtitle>
+          <div>{{ user }}</div>
         </div>
 
-        <v-btn color="primary" text @click="dialogIcone = false"> close </v-btn>
+        <div class="d-flex justify-end">
+          <v-btn @click="dialogIcone = false"> close </v-btn>
+        </div>
       </v-card>
     </v-dialog>
   </span>
