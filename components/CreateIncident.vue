@@ -13,7 +13,7 @@
       </v-card-title>
       <v-form ref="form" v-model="valid" lazy-validation>
         <v-stepper-items>
-          <v-stepper-content step="1" class="stepContent">
+          <v-stepper-content ref="step_1" step="1" class="stepContent">
             <v-card class="mb-2">
               <v-row justify="space-between">
                 <v-col cols="9" sm="" md="">
@@ -796,14 +796,19 @@ export default {
       //   console.log(" this.deadline this.deadline", this.deadline);
       //   return;
       // }
-
-      if (
-        (!this.subject && !this.subject.length) ||
-        !this.description ||
-        !this.assignee
-      ) {
+      console.log(this.$refs.step_1);
+      // return;
+      if (!this.$refs.form.validate(["input-7-1"])) {
         return;
       }
+
+      // if (
+      //   (!this.subject && !this.subject.length) ||
+      //   !this.description ||
+      //   !this.assignee
+      // ) {
+      //   return;
+      // }
       console.log(this.step, "this.stepthis.step");
       this.step = 2;
     },

@@ -85,6 +85,7 @@
         >
 
         <CreateIncident
+          v-if="showCreateForm"
           :dialog.sync="showCreateForm"
           @getIncidents="getIncidents"
         />
@@ -251,20 +252,19 @@
           :search="search"
         >
           <template v-slot:[`item.responderId`]="{ item }">
-            <v-icon
-              @click.stop="
-                (incidentId = item.id), showReporter(), (dialogIcone = true)
-              "
+            <v-icon @click.stop="(incidentId = item.id), (dialogIcone = true)"
               >mdi-eye-outline
             </v-icon>
             <ShowUser
-              v-if="incidentId == item.id"
+              v-if="incidentId == item.id && dialogIcone"
               :dialogIcone.sync="dialogIcone"
               :users="
                 activeBtn === 'reporter' ? item.assignees : item.responders
               "
+              :userDialogTitle="
+                activeBtn === 'reporter' ? 'Assignees' : 'Reporters'
+              "
               :activeBtn="activeBtn"
-              :howShow="howShow"
             />
           </template>
           <template #[`item.icon`]="{ item }">
@@ -296,20 +296,19 @@
           <template v-slot:[`item.creatorId`]="{ item }">
             <div v-if="activeBtn === 'createdByMe'">
               <v-icon
-                @click.stop="
-                  (incidentId = item.id), showAssignee(), (dialogIcone = true)
-                "
+                @click.stop="(incidentId = item.id), (assigneeDialog = true)"
                 >mdi-eye-outline
               </v-icon>
               <ShowUser
-                v-if="incidentId == item.id"
-                :dialogIcone.sync="dialogIcone"
+                v-if="incidentId == item.id && assigneeDialog"
+                :dialogIcone.sync="assigneeDialog"
                 :users="item.assignees"
+                :userDialogTitle="'Assignees'"
                 :activeBtn="activeBtn"
-                :howShow="howShow"
               />
             </div>
-            <div v-if="activeBtn === 'assignee'">
+
+            <div v-if="activeBtn !== 'createdByMe'">
               {{ allUsersNameById[item.creatorId] }}
             </div>
           </template>
@@ -393,6 +392,8 @@ export default {
       allUsersNameById: {},
       incidentId: null,
       dialogIcone: false,
+      assigneeDialog: false,
+      userDialogTitle: "",
     };
   },
   computed: {
@@ -569,13 +570,6 @@ export default {
       this.allUsers.forEach((user) => {
         this.allUsersNameById[user.id] = user.name;
       });
-    },
-    showAssignee() {
-      this.howShow = "";
-      this.howShow = "assignee";
-    },
-    showReporter() {
-      this.howShow = "reporter";
     },
   },
 };

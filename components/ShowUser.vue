@@ -8,10 +8,10 @@
   >
     <v-card class="pa-4">
       <div class="ml-4" v-if="!users || users.length === 0">
-        {{ message }}{{ howShow }}
+        There is no {{ userDialogTitle.toLowerCase() }} for this incident.
       </div>
-      <h5 v-else>{{ title }}:</h5>
-      <div v-for="(user, i) in userNames" :key="i">
+      <h5 v-else class="text-center">{{ userDialogTitle }}</h5>
+      <div class="pa-4" v-for="(user, i) in userNames" :key="i">
         <div>{{ user }}</div>
       </div>
       <div class="d-flex justify-end">
@@ -31,11 +31,7 @@ export default {
     dialogIcone: {
       default: false,
     },
-    activeBtn: {
-      type: String,
-      default: "",
-    },
-    howShow: {
+    userDialogTitle: {
       type: String,
       default: "",
     },
@@ -43,7 +39,6 @@ export default {
   data() {
     return {
       userNames: [],
-      message: "",
       title: "Reporters",
     };
   },
@@ -52,36 +47,9 @@ export default {
   },
   methods: {
     usersByIncidentId() {
-      console.log(
-        this.users,
-        "kk",
-        this.howShow,
-        "this.usersthis.usersthis.userswwwwwwwwwwwwwwww"
-      );
-      if (!this.users.length) {
-        this.message = `There is no ${
-          this.activeBtn === "createdByMe" && this.howShow == "assignee"
-            ? "assignees"
-            : "Reporters"
-        } for this incident`;
-        this.message = `There is no ${
-          this.activeBtn === "reporter" ? "assignees" : "Reporters"
-        } for this incident`;
-      }
-
-      this.title = this.activeBtn === "reporter" ? "Assignees" : "Reporters";
-
-      console.log(
-        "moooooo",
-        this.activeBtn,
-        this.users,
-        this.activeBtn === "reporter"
-      );
       this.userNames = this.users.map((user) => {
         return user.name;
       });
-
-      console.log("-assigneeNames", this.userNames);
     },
     close() {
       this.$emit("update:dialogIcone", false);
