@@ -268,10 +268,7 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import Test from "../components/Test.vue";
-import Test222 from "./test222.vue";
 export default {
-  components: { Test, Test222 },
   data() {
     return {
       showDetailsIncident: false,

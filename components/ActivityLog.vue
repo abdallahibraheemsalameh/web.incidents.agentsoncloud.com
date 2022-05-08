@@ -7,6 +7,7 @@
           v-for="(value, index) in Object.entries(log.oldValue)"
           :key="index"
         >
+          {{ value }}
           <v-row v-if="value[0] !== 'updatedAt'">
             <v-col
               ><div>{{ userName }} Change</div>
@@ -23,16 +24,16 @@
               ></v-col
             >
             <v-col v-if="value[0] == 'deadline' || value[0] == 'happeningTime'">
-              {{ value[1] ? value[1].split("T")[0] : "" }} At
-              {{ value[1] ? value[1].split("T")[1].split(".")[0] : "" }}
-              <!-- <div
-                v-for="(value, index) in Object.entries(log.oldValue)"
+              <!-- {{ value[1] ? value[1].split("T")[0] : "" }} At
+              {{ value[1] ? value[1].split("T")[1].split(".")[0] : "" }} -->
+              <div
+                v-for="(value, index) in Object.entries(log.newValue)"
                 :key="index"
               >
-                <v-col v-if="">
-                  {{ value[1] }}
-                </v-col>
-              </div> -->
+                <v-col> {{ value }}{{ log.newValue }} </v-col>
+              </div>
+
+              <!-- "" -->
             </v-col>
             <v-col v-else>{{ value[1] }} </v-col>
             <v-col>

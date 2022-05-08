@@ -16,7 +16,7 @@ const getters = {
   },
 };
 const actions = {
-  async createComment({ commit }, { incidentId, comment, userId, updated }) {
+  async createComment({ commit }, { incidentId, comment, userId }) {
     try {
       const commentCreated = await this.$axios.$post(
         "/incident-management/comment",
@@ -24,7 +24,6 @@ const actions = {
           incidentId,
           comment,
           userId,
-          updated,
         }
       );
       commit("setComment", commentCreated);

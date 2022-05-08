@@ -43,6 +43,7 @@ export default {
     };
   },
   mounted() {
+    console.log("ShowUser");
     this.usersByIncidentId();
   },
   methods: {

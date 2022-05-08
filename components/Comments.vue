@@ -46,7 +46,7 @@
             :comment_id="item.comment.comment_id"
             :taskCreator="taskCreator"
             :userId="userId"
-            :userName='userName'
+            :userName="userName"
             @newReplay="newReplay"
             @deleteReplay="deleteReplay"
             @updateReplay="updateReplay"
@@ -77,13 +77,14 @@
         <v-btn color="error" dark @click="showAddCommentToggle = false"
           >Cancel</v-btn
         >
-        <v-btn color="primary" dark @click="createComment">Submit</v-btn>
+        <v-btn color="primary" dark @click="createNewComment">Submit</v-btn>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
 import CommentReplays from "./CommentReplays.vue";
 import "animate.css";
 export default {
@@ -105,7 +106,14 @@ export default {
     showAddCommentToggle: false,
     editArray: [],
   }),
+  // computed: {
+  //   ...mapGetters(["incidentDetails"]),
+  // },
+  // mounted(){
+  //   this.getIncidentsDetails()
+  // },
   methods: {
+    ...mapActions(["createComment", "getIncidentsDetails"]),
     async getTaskComments() {
       const res = await this.$axios.get(`/comments/comments/task/${this.id}`);
       this.comments = res.data;
@@ -113,24 +121,38 @@ export default {
         return false;
       });
     },
-    async createComment() {
-      const res = await this.$axios.post(`/comments/comments/addComment`, {
-        task_id: this.id,
-        user_id: this.userId,
-        user_name: this.userName,
+    createNewComment() {
+      console.log(
+        this.id,
+        this.taskCreator,
+        this.userComment,
+        this.userId,
+        "=========================="
+      );
+      this.createComment({
+        incidentId: this.id,
         comment: this.userComment,
+        userId: this.userId,
       });
-      if (res.status === 201) {
-        this.userComment = "";
-        // this.$emit("createComment", res.data);
-        this.comments.push(res.data);
-        this.editArray = [...this.editArray, false];
-        setTimeout(() => {
-          var container = this.$el.querySelector(".v-list");
-          container.scroll({ top: container.scrollHeight, behavior: "smooth" });
-        }, 40);
-      }
     },
+    // async createComment() {
+    //   const res = await this.$axios.post(`/comments/comments/addComment`, {
+    //     task_id: this.id,
+    //     user_id: this.userId,
+    //     user_name: this.userName,
+    //     comment: this.userComment,
+    //   });
+    //   if (res.status === 201) {
+    //     this.userComment = "";
+    //     // this.$emit("createComment", res.data);
+    //     this.comments.push(res.data);
+    //     this.editArray = [...this.editArray, false];
+    //     setTimeout(() => {
+    //       var container = this.$el.querySelector(".v-list");
+    //       container.scroll({ top: container.scrollHeight, behavior: "smooth" });
+    //     }, 40);
+    //   }
+    // },
     deleteComment(index, item) {
       this.$axios.delete(`/comments/comments/deleteComment/${item.comment_id}`);
       this.editArray = this.comments

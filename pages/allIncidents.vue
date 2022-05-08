@@ -67,11 +67,11 @@
     <div class="d-flex justify-space-between mx-8 my-2">
       <div class="d-flex flex-column">
         <div class="d-flex">
-          <h4>OLA : {{ impactOperational() }}</h4>
+          <h4 class="header">OLA : {{ impactOperational() }}</h4>
           <span class="ml-2">Operational level Agreement Incident</span>
         </div>
         <div class="d-flex">
-          <h4>SLA : {{ impactFinancial() }}</h4>
+          <h4 class="header">SLA : {{ impactFinancial() }}</h4>
           <span class="ml-2">Service level Agreement Incident</span>
         </div>
       </div>
@@ -98,61 +98,7 @@
       class="mt-2"
     ></v-progress-linear>
     <!-- Filter -->
-    <!-- <div class="mt-2 ml-8"> -->
-    <!-- <v-container class="contain">
-      <v-toolbar elevation="20" class="mainFilter" shaped>
-        <v-row class="my-0 mx-0">
-          <v-col class="py-0 px-0" cols="1">Filter by:</v-col>
-          <v-col class="py-0 px-1" cols="4">
-            <SelectIssue @setIssueAndItem="filterImpactedIssue" />
-          </v-col>
-          <v-col class="py-0 px-1" cols="2">
-            <v-autocomplete
-              v-model="valueFilter"
-              :items="priorityFilter"
-              dense
-              label="Priority"
-              @change="filterIncidents('priority', valueFilter)"
-              solo
-            ></v-autocomplete>
-          </v-col>
-          <v-col class="py-0 px-1" cols="2">
-            <v-autocomplete
-              v-model="valueFilter"
-              :items="stateFilter"
-              dense
-              label="State"
-              solo
-              @change="filterIncidents('state', valueFilter)"
-            ></v-autocomplete>
-          </v-col>
-          <v-col class="py-0 px-1" cols="2">
-            <v-autocomplete
-              v-model="creatorId"
-              :items="allUsers"
-              dense
-              label="creator name"
-              item-value="id"
-              item-text="name"
-              solo
-              @change="filterCreatorName()"
-            >
-            </v-autocomplete>
-          </v-col>
-          <v-col class="py-0 ml-8" cols="1">
-            <v-btn
-              elevation="2"
-              dense
-              chips
-              small-chips
-              solo
-              @click="clearFilter"
-              >Clear filter</v-btn
-            >
-          </v-col>
-        </v-row>
-      </v-toolbar>
-    </v-container> -->
+
     <v-container class="contain">
       <v-toolbar elevation="20" class="main" shaped>
         <v-row>
@@ -234,7 +180,6 @@
       </v-toolbar>
     </v-container>
     <!-- </div> -->
-    {{ howShow }}
 
     <template>
       <div class="mx-8">
@@ -587,5 +532,8 @@ export default {
   padding: 16px 16px 0px 16px;
   height: 100px !important;
   background-color: #009688 !important;
+}
+h4.header {
+  color: black;
 }
 </style>

@@ -1,17 +1,21 @@
 <template #[`item.icon`]="">
   <div class="text-center">
-    <v-menu top :offset-x="offset">
+    <v-menu top :offset-x="offset" ref="menu">
       <template v-slot:activator="{ on, attrs }">
         <v-icon v-bind="attrs" v-on="on" color="#3daea3"
           >mdi-dots-vertical
         </v-icon>
+        <!-- <v-icon v-bind="attrs" v-on="on" color="#3daea3">mdi-dots-vertical </v-icon> -->
       </template>
-
       <!-- Creator -->
       <v-list class="list" v-if="activeBtn === 'createdByMe'">
         <v-list-item>
           <v-list-item-title
-            ><div @click.stop="showCreateForm = true">
+            ><div
+              @click.stop="
+                (showCreateForm = true), ($refs.menu.isActive = false)
+              "
+            >
               Update
 
               <update-incident
@@ -23,7 +27,13 @@
             </div>
           </v-list-item-title>
         </v-list-item>
-        <v-list-item @change="addComment">
+        <v-list-item
+          @click.stop="
+            (incidentId = incidentIdProps),
+              (showDetailsIncident = true),
+              ($refs.menu.isActive = false)
+          "
+        >
           <v-list-item-title>Add comment</v-list-item-title>
         </v-list-item>
         <v-list-item @change="deleteIncidentFun">
@@ -33,10 +43,21 @@
           <v-list-item-title>Reassign</v-list-item-title>
         </v-list-item>
       </v-list>
-
+      <IncidentDetails
+        v-if="incidentId == incidentIdProps"
+        :dialogDetails.sync="showDetailsIncident"
+        :incidentId="incidentIdProps"
+        :activeBtn="activeBtn"
+      />
       <!-- Others -->
-      <v-list class="list" v-else>
-        <v-list-item @change="addComment">
+      <v-list class="list" v-if="activeBtn !== 'createdByMe'">
+        <v-list-item
+          @click.stop="
+            (incidentId = incidentIdProps),
+              (showDetailsIncident = true),
+              ($refs.menu.isActive = false)
+          "
+        >
           <v-list-item-title>Add comment</v-list-item-title>
         </v-list-item>
         <v-list-item>
@@ -89,6 +110,9 @@ export default {
       userId: localStorage.getItem("userId"),
       showCreateForm: false,
       showText: false,
+      showDetailsIncident: false,
+      incidentId: null,
+      showList: false,
     };
   },
   computed: {
@@ -104,11 +128,6 @@ export default {
     ...mapActions(["incidentUpdated", "deleteIncident", "updateIncidentState"]),
     deleteIncidentFun() {
       this.deleteIncident(this.itemProps.id);
-    },
-
-    addComment() {
-      this.$router.push(`/incidentDetails?incidentId=${this.incidentIdProps}`);
-      console.log(this.itemProps, "cooooooo");
     },
   },
 };

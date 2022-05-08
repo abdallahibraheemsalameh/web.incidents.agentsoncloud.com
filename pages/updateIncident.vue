@@ -289,96 +289,6 @@
                       </template>
                     </div>
                   </div>
-
-                  <v-select
-                    v-model="assignee"
-                    :items="allUsers"
-                    item-text="name"
-                    item-value="id"
-                    :rules="assigneeRules"
-                    background-color="#ffffff"
-                    label="assignee"
-                    multiple
-                    chips
-                  >
-                    <template v-slot:selection="data">
-                      <v-chip
-                        :key="JSON.stringify(data.item)"
-                        v-bind="data.attrs"
-                        :input-value="data.selected"
-                        :disabled="data.disabled"
-                        @click:close="data.parent.selectItem(data.item)"
-                      >
-                        <v-avatar
-                          class="accent white--text"
-                          left
-                          v-text="
-                            String(data.item.name).slice(0, 1).toUpperCase()
-                          "
-                        ></v-avatar>
-                        {{ data.item.name }}
-                      </v-chip>
-                    </template>
-                  </v-select>
-                  <v-select
-                    v-model="secondaryAssignee"
-                    :items="allUsers"
-                    item-text="name"
-                    item-value="id"
-                    label="Secondary assignee"
-                    background-color="#ffffff"
-                  ></v-select>
-
-                  <v-combobox
-                    v-model="responder"
-                    :items="allUsers"
-                    multiple
-                    chips
-                    item-text="name"
-                    item-value="id"
-                    label="responder"
-                    background-color="#ffffff"
-                  >
-                    <template v-slot:selection="data">
-                      <v-chip
-                        :key="JSON.stringify(data.item)"
-                        v-bind="data.attrs"
-                        :input-value="data.selected"
-                        :disabled="data.disabled"
-                        @click:close="data.parent.selectItem(data.item)"
-                      >
-                        <v-avatar
-                          class="accent white--text"
-                          left
-                          v-text="
-                            String(data.item.name).slice(0, 1).toUpperCase()
-                          "
-                        ></v-avatar>
-                        {{ data.item.name }}
-                      </v-chip>
-                    </template>
-                  </v-combobox>
-                </v-col>
-              </v-row>
-            </v-card>
-            <div class="d-flex justify-end mr-8">
-              <v-btn class="pa-4 ma-4 text-capitalize" @click.native="close">
-                Close
-              </v-btn>
-              <v-btn
-                color="primary"
-                class="pa-4 ma-4 text-capitalize"
-                @click="next"
-              >
-                Next</v-btn
-              >
-            </div>
-          </v-stepper-content>
-
-          <v-stepper-content step="2" class="stepContent">
-            <v-card class="mb-2">
-              <v-row>
-                <v-col>
                   <div>
                     <div v-if="datePicker">
                       <v-date-picker
@@ -436,6 +346,95 @@
                       </div>
                     </div>
                   </div>
+                  <v-select
+                    v-model="assignee"
+                    :items="allUsers"
+                    item-text="name"
+                    item-value="id"
+                    :rules="assigneeRules"
+                    background-color="#ffffff"
+                    label="assignee"
+                    multiple
+                    chips
+                  >
+                    <template v-slot:selection="data">
+                      <v-chip
+                        :key="JSON.stringify(data.item)"
+                        v-bind="data.attrs"
+                        :input-value="data.selected"
+                        :disabled="data.disabled"
+                        @click:close="data.parent.selectItem(data.item)"
+                      >
+                        <v-avatar
+                          class="accent white--text"
+                          left
+                          v-text="
+                            String(data.item.name).slice(0, 1).toUpperCase()
+                          "
+                        ></v-avatar>
+                        {{ data.item.name }}
+                      </v-chip>
+                    </template>
+                  </v-select>
+                </v-col>
+              </v-row>
+            </v-card>
+            <div class="d-flex justify-end mr-8">
+              <v-btn class="pa-4 ma-4 text-capitalize" @click.native="close">
+                Close
+              </v-btn>
+              <v-btn
+                color="primary"
+                class="pa-4 ma-4 text-capitalize"
+                @click="next"
+              >
+                Next</v-btn
+              >
+            </div>
+          </v-stepper-content>
+
+          <v-stepper-content step="2" class="stepContent">
+            <v-card class="mb-2">
+              <v-row>
+                <v-col>
+                  <v-select
+                    v-model="secondaryAssignee"
+                    :items="allUsers"
+                    item-text="name"
+                    item-value="id"
+                    label="Secondary assignee"
+                    background-color="#ffffff"
+                  ></v-select>
+
+                  <v-select
+                    v-model="responder"
+                    :items="allUsers"
+                    multiple
+                    chips
+                    item-text="name"
+                    item-value="id"
+                    label="responder"
+                    background-color="#ffffff"
+                  >
+                    <template v-slot:selection="data">
+                      <v-chip
+                        :key="JSON.stringify(data.item)"
+                        v-bind="data.attrs"
+                        :input-value="data.selected"
+                        :disabled="data.disabled"
+                        @click:close="data.parent.selectItem(data.item)"
+                      >
+                        <v-avatar
+                          class="accent white--text"
+                          left
+                          v-text="
+                            String(data.item.name).slice(0, 1).toUpperCase()
+                          "
+                        ></v-avatar>
+                        {{ data.item.name }}
+                      </v-chip>
+                    </template>
+                  </v-select>
                 </v-col>
 
                 <v-col>
@@ -707,6 +706,7 @@ export default {
           ? [{ id: this.selectedImpactedIssueId, item: this.itemName }]
           : [],
         assignee: this.assignee,
+        responder: this.responder,
       };
       console.log(data, "data");
 

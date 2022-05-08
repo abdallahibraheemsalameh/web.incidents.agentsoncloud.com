@@ -1,38 +1,107 @@
 <template>
-  <div>
-    <div class="d-flex">
-      <v-checkbox v-model="readonly" label="Readonly"></v-checkbox>
-    </div>
-
-    <v-expansion-panels v-model="panel" :readonly="readonly" multiple>
-      <v-expansion-panel>
-        <div>
-          <v-expansion-panel-title>Panel 1</v-expansion-panel-title>
-          <v-icon @click="readonly = !readonly">mdi-chevron-down</v-icon>
-        </div>
-        <v-expansion-panel-text v-if="readonly">
-          Some content
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-
-      <v-expansion-panel>
-        <v-expansion-panel-title>Panel 2</v-expansion-panel-title>
-        <v-expansion-panel-text> Some content </v-expansion-panel-text>
-      </v-expansion-panel>
-
-      <v-expansion-panel>
-        <v-expansion-panel-title>Panel 3</v-expansion-panel-title>
-        <v-expansion-panel-text> Some content </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
-  </div>
+  <v-row justify="center">
+    <v-dialog v-model="dialog" persistent max-width="600px">
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn color="primary" dark v-bind="attrs" v-on="on">
+          Open Dialog
+        </v-btn>
+      </template>
+      <v-card>
+        <v-card-title>
+          <span class="text-h5">User Profile</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12" sm="6" md="6">
+                <v-text-field
+                  :rules="nameRules"
+                  label="Legal first name*"
+                  required
+                  v-model="form.name"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" md="6">
+                <v-text-field
+                  :rules="middelName"
+                  v-model="form.middelName"
+                  label="Legal middle name"
+                  hint="example of helper text only on focus"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" md="6">
+                <v-text-field
+                  :rules="lastname"
+                  label="Legal last name*"
+                  hint="example of persistent helper text"
+                  persistent-hint
+                  v-model="form.lastname"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  label="Email*"
+                  required
+                  v-model="form.Email"
+                  :rules="EmailRule"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn class="btn-close" text @click="dialog = false"> Close </v-btn>
+          <v-btn
+            class="btn-save"
+            text
+            :disabled="
+              form.name == '' ||
+              form.Email == '' ||
+              form.lastname == '' ||
+              form.middelName == ''
+            "
+          >
+            Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-row>
 </template>
 
+// vue script
 <script>
 export default {
   data: () => ({
-    panel: [0, 1],
-    readonly: false,
+    dialog: false,
+    form: {
+      name: "",
+      middelName: "",
+      lastname: "",
+      Email: "",
+    },
+    lastname: [(v) => !!v || "This field is required"],
+    middelName: [(v) => !!v || "This field is required"],
+    nameRules: [(v) => !!v || "This field is required"],
+    EmailRule: [(v) => !!v || "E-mail is required"],
   }),
 };
 </script>
+
+<style scoped>
+.btn-close {
+  color: gray !important;
+}
+
+.btn-save:enabled {
+  background-color: #1976d2 !important;
+  color: #fff;
+}
+
+.btn-save:disabled {
+  background-color: #e0e0e0 !important;
+  color: #a6a6a6 !important;
+}
+</style>
