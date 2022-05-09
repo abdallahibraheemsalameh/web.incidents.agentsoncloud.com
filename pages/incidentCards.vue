@@ -164,29 +164,29 @@
                         Creator :{{ allUsersNameById[incident.creatorId] }}
                       </div> -->
                       <div v-if="activeBtn === 'createdByMe'">
-                        Assignee :<ShowAssignees
+                        <!-- Assignee :<ShowAssignees
                           :assignees="incident.assignees"
+                        /> -->
+
+                        Assignees:
+                        <v-icon
+                          @click.stop="
+                            (incidentId = incident.id), (assigneeDialog = true)
+                          "
+                          >mdi-eye-outline
+                        </v-icon>
+
+                        <ShowUser
+                          v-if="incidentId == incident.id && assigneeDialog"
+                          :dialogIcone.sync="assigneeDialog"
+                          :users="incident.assignees"
+                          :userDialogTitle="'Assignees'"
+                          :activeBtn="activeBtn"
                         />
                       </div>
                       <div v-else>
                         Creator :{{ allUsersNameById[incident.creatorId] }}
                       </div>
-
-                      <!-- <div v-if="activeBtn === 'reporter'">
-                        Reporter :
-                        <v-icon
-                          @click.stop="
-                            (incidentId = incident.id), (dialogIcone = true)
-                          "
-                          >mdi-eye-outline
-                        </v-icon>
-                        <ShowUser
-                          v-if="incidentId == incident.id"
-                          :dialogIcone.sync="dialogIcone"
-                          :users="incident.responders"
-                          :activeBtn="activeBtn"
-                        />
-                      </div> -->
                     </v-card-text>
 
                     <v-card-text style="height: 25px">
@@ -209,17 +209,44 @@
                     </v-card-text>
 
                     <v-card-text style="height: 25px">
-                      {{
-                        incident.createdAt
-                          ? incident.createdAt.split("T")[0]
-                          : ""
-                      }}
-                      at
-                      {{
-                        incident.createdAt
-                          ? incident.createdAt.split("T")[1].split(".")[0]
-                          : ""
-                      }}
+                      <div
+                        v-if="
+                          activeBtn === 'createdByMe' ||
+                          activeBtn === 'assignee'
+                        "
+                      >
+                        Reporters:
+                        <v-icon
+                          @click.stop="
+                            (incidentId = incident.id), (reporterDialog = true)
+                          "
+                          >mdi-eye-outline
+                        </v-icon>
+                        <ShowUser
+                          v-if="incidentId == incident.id && reporterDialog"
+                          :dialogIcone.sync="reporterDialog"
+                          :users="incident.responders"
+                          :userDialogTitle="'Reporters'"
+                          :activeBtn="activeBtn"
+                        />
+                      </div>
+                      <div v-if="activeBtn === 'reporter'">
+                        Assignees:
+                        <v-icon
+                          @click.stop="
+                            (incidentId = incident.id), (assigneeDialog = true)
+                          "
+                          >mdi-eye-outline
+                        </v-icon>
+
+                        <ShowUser
+                          v-if="incidentId == incident.id && assigneeDialog"
+                          :dialogIcone.sync="assigneeDialog"
+                          :users="incident.assignees"
+                          :userDialogTitle="'Assignees'"
+                          :activeBtn="activeBtn"
+                        />
+                      </div>
                     </v-card-text>
                   </v-col>
                   <v-col cols="5">
@@ -303,6 +330,8 @@ export default {
       subjectsIncident: [],
       dialogIcone: false,
       message: "",
+      reporterDialog: false,
+      assigneeDialog: false,
     };
   },
   computed: {

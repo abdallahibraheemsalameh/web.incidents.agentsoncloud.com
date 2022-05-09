@@ -109,9 +109,9 @@ export default {
   // computed: {
   //   ...mapGetters(["incidentDetails"]),
   // },
-  // mounted(){
-  //   this.getIncidentsDetails()
-  // },
+  mounted() {
+    console.log("show");
+  },
   methods: {
     ...mapActions(["createComment", "getIncidentsDetails"]),
     async getTaskComments() {

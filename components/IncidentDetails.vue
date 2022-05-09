@@ -133,7 +133,6 @@
                   :userDialogTitle="'Assignees'"
                   :activeBtn="activeBtn"
                 />
-                >
               </v-row>
             </v-row>
             <v-progress-linear

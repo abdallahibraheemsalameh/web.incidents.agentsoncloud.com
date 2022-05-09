@@ -30,7 +30,7 @@
         <v-list-item
           @click.stop="
             (incidentId = incidentIdProps),
-              (showDetailsIncident = true),
+              (showDialogComment = true),
               ($refs.menu.isActive = false)
           "
         >
@@ -39,7 +39,11 @@
         <v-list-item @change="deleteIncidentFun">
           <v-list-item-title>Delete</v-list-item-title>
         </v-list-item>
-        <v-list-item>
+        <v-list-item
+          @click.stop="
+            (showDialogReassin = true), ($refs.menu.isActive = false)
+          "
+        >
           <v-list-item-title>Reassign</v-list-item-title>
         </v-list-item>
       </v-list>
@@ -49,12 +53,40 @@
         :incidentId="incidentIdProps"
         :activeBtn="activeBtn"
       />
+
+      <Reassign
+        v-if="itemProps.id == incidentIdProps && showDialogReassin"
+        :dialogReassign.sync="showDialogReassin"
+        :incident="itemProps"
+      />
+      <v-dialog
+        v-model="showDialogComment"
+        light
+        persistent
+        overlay-color="rgb(255 255 255)"
+        overlay-opacity="0.90"
+        width="70%"
+      >
+        <Comments
+          v-if="showDialogComment"
+          :id="incidentIdProps.toString()"
+          type="incident"
+          :taskCreator="itemProps.creatorId"
+          :userId="userId"
+          userName="name"
+        />
+        <div class="d-flex justify-end mr-8">
+          <v-btn class="pa-4 ma-4 text-capitalize" @click.native="close">
+            Close
+          </v-btn>
+        </div>
+      </v-dialog>
       <!-- Others -->
       <v-list class="list" v-if="activeBtn !== 'createdByMe'">
         <v-list-item
           @click.stop="
             (incidentId = incidentIdProps),
-              (showDetailsIncident = true),
+              (showDialogComment = true),
               ($refs.menu.isActive = false)
           "
         >
@@ -96,9 +128,10 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import updateIncident from "../pages/updateIncident.vue";
+import Reassign from "./Reassign.vue";
 import StateAction from "./StateAction.vue";
 export default {
-  components: { updateIncident, StateAction },
+  components: { updateIncident, StateAction, Reassign },
   props: ["creatorIdProps", "incidentIdProps", "itemProps", "activeBtn"],
 
   data() {
@@ -106,20 +139,22 @@ export default {
       offset: true,
       recordStatua: "",
       dialog: false,
-      userId: 0,
-      userId: localStorage.getItem("userId"),
+      // userId: 0,
+      userId: +localStorage.getItem("userId"),
       showCreateForm: false,
       showText: false,
       showDetailsIncident: false,
       incidentId: null,
       showList: false,
+      showDialogComment: false,
+      showDialogReassin: false,
     };
   },
   computed: {
     ...mapGetters(["allIncident", "incidentState", "allIncidentsAssigneeToMe"]),
   },
   async mounted() {
-    this.userId = localStorage.getItem("userId");
+    this.userId = +localStorage.getItem("userId");
   },
   methods: {
     async getIncidents(value) {
@@ -128,6 +163,9 @@ export default {
     ...mapActions(["incidentUpdated", "deleteIncident", "updateIncidentState"]),
     deleteIncidentFun() {
       this.deleteIncident(this.itemProps.id);
+    },
+    close() {
+      this.showDialogComment = false;
     },
   },
 };
