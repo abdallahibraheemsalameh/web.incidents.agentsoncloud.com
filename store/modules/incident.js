@@ -135,6 +135,8 @@ const actions = {
 
         { state, actionText }
       );
+
+      console.log(state, actionText, "lkkkkyyyyyyyyyyyyyyyyyyy");
       commit("updateState", stateUpdated);
     } catch (err) {
       console.log(err);

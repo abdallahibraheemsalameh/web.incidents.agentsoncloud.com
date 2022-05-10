@@ -149,7 +149,7 @@
 
       <div v-if="!showIncidents.length">
         <v-card height="50" class="grey--text pt-3 d-flex justify-center"
-          >Nothing Data</v-card
+          >There is no incident</v-card
         >
       </div>
       <div v-else>

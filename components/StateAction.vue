@@ -63,20 +63,28 @@ export default {
   },
   data() {
     return {
-      actionText: "",
       textRules: [(value) => !!value || "Text is required"],
       valid: false,
+      actionText: "",
+      reasonOnHold: "",
+      actionCorrective: "",
+      actionPreventive: "",
     };
   },
+  mounted() {},
   methods: {
-    ...mapActions(["updateIncidentState"]),
+    ...mapActions(["updateIncidentState", "addState"]),
     async updateState() {
       console.log(this.$refs.form.validate());
       if (!this.actionText) {
         return;
       }
-      console.log(this.state, this.actionText, this.incidentId);
+
       await this.updateIncidentState({
+        id: this.incidentId,
+        state: this.state,
+      });
+      await this.addState({
         id: this.incidentId,
         state: this.state,
         actionText: this.actionText,

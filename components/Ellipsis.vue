@@ -58,6 +58,7 @@
         v-if="itemProps.id == incidentIdProps && showDialogReassin"
         :dialogReassign.sync="showDialogReassin"
         :incident="itemProps"
+        @getIncidents="getIncidents"
       />
       <v-dialog
         v-model="showDialogComment"
@@ -110,13 +111,12 @@
         </v-list-item>
         <v-list-item>
           <v-list-item-title
-            @click.stop="(showText = true), (state = 'Resolved (corrective)')"
+            @click.stop="(showText = true), (state = 'Resolved')"
             >Resolved (corrective)</v-list-item-title
           >
         </v-list-item>
         <v-list-item>
-          <v-list-item-title
-            @click.stop="(showText = true), (state = 'Closed (preventive)')"
+          <v-list-item-title @click.stop="(showText = true), (state = 'Closed')"
             >Closed (preventive)</v-list-item-title
           >
         </v-list-item>

@@ -9,6 +9,7 @@ import comment from "./modules/comment";
 import creator from "./modules/creator";
 import activityLog from "./modules/activityLog";
 import update from "./modules/updates";
+import stateIncident from "./modules/stateIncident";
 Vue.use(Vuex);
 export default () =>
   new Vuex.Store({
@@ -20,5 +21,6 @@ export default () =>
       creator,
       activityLog,
       update,
+      stateIncident,
     },
   });

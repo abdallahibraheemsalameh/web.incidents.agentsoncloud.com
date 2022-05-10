@@ -401,7 +401,7 @@ export default {
         { text: "state", value: "state" },
         { text: "Deadline", value: "deadline" },
         // { text: "category", value: "category" },
-        { text: "Escalation policy", value: "escalationPolicy" },
+        { text: "Update duration", value: "escalationPolicy" },
         { text: responderHeader, value: "responderId" },
         { text: "", value: "icon" },
       ];

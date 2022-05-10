@@ -283,19 +283,9 @@
               color="rgb(117 117 117)"
               class="line"
             ></v-progress-linear>
-            <v-row class="d-flex justify-space-around pa-2">
-              <v-col><h4>Escalation policy</h4></v-col>
-              <v-col>{{ incidentDetails.escalationPolicy }}</v-col>
-            </v-row>
-            <v-progress-linear
-              height="1"
-              value="200"
-              color="rgb(117 117 117)"
-              class="line"
-            ></v-progress-linear>
 
             <v-row class="d-flex justify-space-around pa-2">
-              <v-col><h4>Escalation time</h4></v-col>
+              <v-col><h4>Update duration</h4></v-col>
               <v-col>{{ incidentDetails.escalationPolicy }}</v-col>
             </v-row>
             <v-progress-linear
@@ -304,7 +294,8 @@
               color="rgb(117 117 117)"
               class="line"
             ></v-progress-linear>
-            <v-row class="d-flex justify-space-around pa-2">
+            <!-- Escalation status or next update???????? -->
+            <!-- <v-row class="d-flex justify-space-around pa-2">
               <v-col><h4>Escalation status</h4></v-col>
               <v-col>{{ incidentDetails.escalationPolicy }}</v-col>
             </v-row>
@@ -313,7 +304,7 @@
               value="200"
               color="rgb(117 117 117)"
               class="line"
-            ></v-progress-linear>
+            ></v-progress-linear> -->
             <v-row
               class="d-flex justify-space-around pa-2"
               v-if="
@@ -488,7 +479,7 @@
           </div>
 
           <div v-else-if="buttonName == `updates`">
-            <div class="pa-4">
+            <!-- <div class="pa-4">
               <v-row>
                 <v-col col="1"></v-col>
                 <v-col col="6">
@@ -501,12 +492,37 @@
                   ></v-text-field>
                 </v-col>
                 <v-col col="4">
-                  <v-btn @click="createNewUpdate" class="text-capitalize">
-                    Update
-                  </v-btn>
+                <v-btn @click="createNewUpdate" class="text-capitalize">
+                  Update
+                </v-btn>
                 </v-col>
-                <v-col col="1"></v-col>
+                <v-col class="d-flex mr-12">
+                  <div>
+                    <h4>Next update:</h4>
+                  </div>
+                  <div class="pl-4">after 12:90 M</div>
+                </v-col>
               </v-row>
+            </div> -->
+            <div class="d-flex justify-space-around pa-4">
+              <div class="textFieldUpdate d-flex">
+                <v-text-field
+                  v-model="updateText"
+                  label="Update text"
+                  dense
+                  value=""
+                  solo
+                ></v-text-field>
+                <v-btn @click="createNewUpdate" class="text-capitalize ml-4">
+                  Update
+                </v-btn>
+              </div>
+              <div class="d-flex mr-16">
+                <div>
+                  <h4>Next update:</h4>
+                </div>
+                <div class="pl-4">after 12:90 M</div>
+              </div>
             </div>
             <v-container>
               <v-card
@@ -598,25 +614,7 @@ export default {
     return {
       search: "",
       creatorId: null,
-      headers: [
-        {
-          text: "Incident subject",
-          align: "start",
-          value: "subject",
-        },
-        // { text: "Impacted issue", value: "calories" },
-        { text: "Creator", value: "creatorId" },
-        { text: "Happening time", value: "happeningTime" },
-        { text: "Date creation and time", value: "createdAt" },
-        // { text: "priority", value: "priority(item)" },
-        { text: "Severity Level", value: "severityLevel" },
-        { text: "Impact Level", value: "impactLevel" },
-        { text: "state", value: "state" },
-        { text: "Deadline", value: "deadline" },
-        // { text: "category", value: "category" },
-        { text: "Escalation policy", value: "escalationPolicy" },
-        { text: "responder", value: "responderId" },
-      ],
+
       userId: +localStorage.getItem("userId"),
       name: "Noof",
       items: "",
@@ -682,6 +680,7 @@ export default {
       : (this.title = "Reporter:");
     this.commentIncident = this.incidentDetails.id.toString();
     console.log(this.activeBtn, "activeBtnactiveBtn");
+    this.nextUpdate();
   },
   methods: {
     ...mapActions([
@@ -782,6 +781,12 @@ export default {
         incidentId: this.incidentDetails.id,
       });
     },
+    nextUpdate() {
+      let timeNow = new Date();
+      // let arrayTime = timeNow.split("");
+      // console.log(timeNow, arrayTime, "dddddddddddddddd");
+      // const myTimeout = setTimeout(myGreeting, 60000);
+    },
   },
 };
 </script>
@@ -834,5 +839,8 @@ export default {
 }
 h4 {
   color: rgb(24 103 192);
+}
+.textFieldUpdate {
+  width: 50%;
 }
 </style>

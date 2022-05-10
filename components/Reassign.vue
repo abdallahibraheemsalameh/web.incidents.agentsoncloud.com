@@ -15,34 +15,36 @@
       </v-card-title>
       <v-row class="ml-1">
         <v-col>
-          <v-select
-            v-model="assignee"
-            :items="allUsers"
-            item-text="name"
-            item-value="id"
-            label="Add assignee"
-            multiple
-            chips
-          >
-            <template v-slot:selection="data">
-              <v-chip
-                :key="JSON.stringify(data.item)"
-                v-bind="data.attrs"
-                :input-value="data.selected"
-                :disabled="data.disabled"
-                @click:close="data.parent.selectItem(data.item)"
-              >
-                <v-avatar
-                  class="accent white--text"
-                  left
-                  v-text="String(data.item.name).slice(0, 1).toUpperCase()"
-                ></v-avatar>
-                {{ data.item.name }}
-              </v-chip>
-            </template>
-          </v-select>
+          <div class="changeAssignee">
+            <v-select
+              v-model="assignee"
+              :items="allUsers"
+              item-text="name"
+              item-value="id"
+              label="Change assignee"
+              multiple
+              chips
+            >
+              <template v-slot:selection="data">
+                <v-chip
+                  :key="JSON.stringify(data.item)"
+                  v-bind="data.attrs"
+                  :input-value="data.selected"
+                  :disabled="data.disabled"
+                  @click:close="data.parent.selectItem(data.item)"
+                >
+                  <v-avatar
+                    class="accent white--text"
+                    left
+                    v-text="String(data.item.name).slice(0, 1).toUpperCase()"
+                  ></v-avatar>
+                  {{ data.item.name }}
+                </v-chip>
+              </template>
+            </v-select>
+          </div>
         </v-col>
-        <v-col class="pa-7">
+        <v-col class="pa-7" v-if="incident.secondaryAssignee">
           <v-checkbox
             v-model="checkSecondaryAssignee"
             :label="`Assign the secondary assignee ${incident.secondaryAssignee}`"
@@ -52,7 +54,7 @@
       <v-row class="ml-4">
         <div>You want update the deadline or not?</div>
       </v-row>
-      <div class="ml-4">
+      <div class="pa-4 fieldUpdate">
         <div>
           <div v-if="datePicker">
             <v-date-picker
@@ -180,6 +182,8 @@ export default {
         assignee: this.assignee,
       };
       this.updateIncidentById({ id: this.incident.id, body: data });
+      this.$emit("update:dialogReassign", false);
+      this.$emit("getIncidents");
     },
     deadlineFun() {
       if (this.updateDate == null || this.updateTime == null) {
@@ -200,4 +204,11 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.fieldUpdate {
+  width: 80%;
+}
+.changeAssignee {
+  width: 60%;
+}
+</style>
