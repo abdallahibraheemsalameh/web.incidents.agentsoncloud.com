@@ -1,14 +1,12 @@
-
 const Activity = {
   namespace: true,
+  // j
   state: {
-  activityLog: [],
-   
+    activityLog: [],
   },
 
   mutations: {
     newActivityLog: (state, activityLog) => (state.activityLog = activityLog),
-  
   },
   actions: {
     async getActivityLog({ commit }, incidentId) {
