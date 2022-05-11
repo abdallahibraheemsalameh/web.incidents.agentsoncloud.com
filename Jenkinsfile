@@ -21,7 +21,7 @@ pipeline {
                         execCommand: "cd /var/www/ && git clone --branch release_1 https://github.com/agents-on-cloud/web.incidents.agentsoncloud.com.git"
                           ),
                sshTransfer(
-                        execCommand: "cd /var/www/web.incidents.agentsoncloud.com && npm i && npm run build &&  pm2 start "
+                        execCommand: "cd /var/www/web.incidents.agentsoncloud.com && npm i"
                          ),
                 ])
             ])
@@ -35,6 +35,18 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo("I am in Deploy")
+            sshPublisher(
+            continueOnError: false, failOnError: true,
+            publishers: [
+                sshPublisherDesc(
+                configName: "dev server",
+                verbose: true,
+                transfers: [
+               sshTransfer(
+                        execCommand: "cd /var/www/web.incidents.agentsoncloud.com && npm i"
+                         ),
+                ])
+            ])
             }
         }
     }
