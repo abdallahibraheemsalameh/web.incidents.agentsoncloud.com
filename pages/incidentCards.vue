@@ -4,7 +4,7 @@
       offset-y
       close-on-click
       :close-on-content-click="false"
-      max-width="700"
+      max-width="600"
     >
       <template v-slot:activator="{ on, attrs }">
         <v-row justify="space-around">
@@ -13,10 +13,18 @@
           </v-icon>
         </v-row>
       </template>
-      <v-container class="contain">
-        <v-toolbar elevation="20" class="main" shaped>
-          <v-row>
-            <v-col>
+      <v-container>
+        <v-row>
+          <div class="headerCard d-flex justify-space-around">
+            <div class="titleCards pa-2">Incident</div>
+
+            <v-icon large class="" color="#009688" @click="goToIncidentPage">
+              mdi-open-in-new
+            </v-icon>
+          </div>
+        </v-row>
+        <v-row>
+          <!-- <v-col>
               <v-autocomplete
                 cols="12"
                 md="3"
@@ -34,25 +42,41 @@
                 @change="filterCreatorName()"
               >
               </v-autocomplete>
-            </v-col>
-            <v-col>
-              <v-autocomplete
-                cols="12"
-                md="3"
-                v-model="valueFilter"
-                :items="priorityFilter"
-                cache-items
-                class="filterSearch"
-                flat
-                hide-no-data
-                hide-details
-                placeholder="Priority"
-                solo-inverted
-                @change="filterIncidents('priority', valueFilter)"
-              >
-              </v-autocomplete>
-            </v-col>
-            <v-col>
+            </v-col> -->
+          <v-col>
+            <v-autocomplete
+              cols="12"
+              md="3"
+              v-model="valueFilter"
+              :items="subjectsIncident"
+              cache-items
+              class="filterSearch"
+              flat
+              hide-no-data
+              hide-details
+              placeholder="Subject"
+              @change="filterIncidents('subject', valueFilter)"
+            >
+            </v-autocomplete>
+          </v-col>
+
+          <v-col>
+            <v-autocomplete
+              cols="12"
+              md="3"
+              v-model="valueFilter"
+              :items="priorityFilter"
+              cache-items
+              class="filterSearch"
+              flat
+              hide-no-data
+              hide-details
+              placeholder="Priority"
+              @change="filterIncidents('priority', valueFilter)"
+            >
+            </v-autocomplete>
+          </v-col>
+          <!-- <v-col>
               <v-autocomplete
                 cols="12"
                 md="3"
@@ -68,31 +92,14 @@
                 @change="filterIncidents('state', valueFilter)"
               >
               </v-autocomplete>
-            </v-col>
-            <v-col>
-              <v-autocomplete
-                cols="12"
-                md="3"
-                v-model="valueFilter"
-                :items="subjectsIncident"
-                cache-items
-                class="filterSearch"
-                flat
-                hide-no-data
-                hide-details
-                placeholder="Subject"
-                solo-inverted
-                @change="filterIncidents('subject', valueFilter)"
-              >
-              </v-autocomplete>
-            </v-col>
+            </v-col> -->
 
-            <v-col>
-              <v-btn class="btn-reset" @click="clearFilter">Clear</v-btn>
-            </v-col>
-          </v-row>
-        </v-toolbar>
-        <v-icon large @click="goToIncidentPage"> mdi-open-in-new </v-icon>
+          <v-col>
+            <v-btn class="text-capitalize mt-4" @click="clearFilter"
+              >Clear</v-btn
+            >
+          </v-col>
+        </v-row>
       </v-container>
       <div>
         <CreateIncident
@@ -107,12 +114,12 @@
           <div class="ml-8 mt-4">
             <v-btn
               :outlined="activeBtn === 'assignee'"
-              color="indigo accent-2"
+              color="rgb(160 160 160)"
               elevation="2"
               :plain="activeBtn !== 'assignee'"
               @click="assignedToMe"
               :text="false"
-              class="textBtu"
+              class="textBtu text-capitalize"
             >
               Assigned to me</v-btn
             >
@@ -122,7 +129,7 @@
               elevation="2"
               :plain="activeBtn !== 'createdByMe'"
               @click="getIncidentCreatedByMe"
-              class="textBtu"
+              class="text-capitalize red--text"
             >
               Created by me</v-btn
             >
@@ -132,7 +139,7 @@
               elevation="2"
               :plain="activeBtn !== 'reporter'"
               @click="getIncidentResponder"
-              class="textBtu"
+              class="textBtu text-capitalize"
             >
               reporting on</v-btn
             >
@@ -155,10 +162,10 @@
       <div v-else>
         <v-list v-for="(incident, index) in showIncidents" :key="index">
           <v-list-item>
-            <v-card elevation="2" width="800" height="120">
+            <v-card elevation="2" width="600" height="120">
               <div class="rowCards">
                 <v-row>
-                  <v-col cols="6" style="height: 25px">
+                  <v-col cols="5" style="height: 25px">
                     <v-card-text style="height: 25px">
                       <!-- <div v-if="activeBtn === 'assignee'">
                         Creator :{{ allUsersNameById[incident.creatorId] }}
@@ -249,7 +256,7 @@
                       </div>
                     </v-card-text>
                   </v-col>
-                  <v-col cols="5">
+                  <v-col cols="6">
                     <!-- <v-card-text style="height: 25px">
                   Activity status :
                 </v-card-text> -->
@@ -263,12 +270,8 @@
 
                     <v-card-text style="height: 25px">
                       Deadline :{{
-                        incident.deadline ? incident.deadline.split("T")[0] : ""
-                      }}
-                      at
-                      {{
                         incident.deadline
-                          ? incident.deadline.split("T")[1].split(".")[0]
+                          ? new Date(incident.deadline).toLocaleString()
                           : ""
                       }}</v-card-text
                     >
@@ -451,6 +454,13 @@ export default {
   padding: 16px;
   height: 100px !important;
   background-color: #009688 !important;
+}
+.titleCards {
+  font-size: 28px;
+  color: #009688;
+}
+.headerCard {
+  width: 100%;
 }
 .main .filterSearch {
   background-color: #fff;

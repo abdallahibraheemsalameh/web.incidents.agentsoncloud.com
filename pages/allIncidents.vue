@@ -197,9 +197,18 @@
           :search="search"
         >
           <template v-slot:[`item.responderId`]="{ item }">
+            <div
+              v-if="
+                activeBtn === 'assignee' ||
+                (activeBtn === 'createdByMe' && !item.responders)
+              "
+            >
+              No reporter
+            </div>
             <v-icon @click.stop="(incidentId = item.id), (dialogIcone = true)"
               >mdi-eye-outline
             </v-icon>
+
             <ShowUser
               v-if="incidentId == item.id && dialogIcone"
               :dialogIcone.sync="dialogIcone"
@@ -232,7 +241,7 @@
               >
             </div>
             <IncidentDetails
-              v-if="incidentId == item.id"
+              v-if="incidentId == item.id && showDetailsIncident"
               :dialogDetails.sync="showDetailsIncident"
               :incidentId="item.id"
               :activeBtn="activeBtn"
@@ -265,14 +274,12 @@
             </div>
           </template>
           <template v-slot:[`item.deadline`]="{ item }">
-            {{ item.deadline ? item.deadline.split("T")[0] : "" }} at
-            {{ item.deadline ? item.deadline.split("T")[1].split(".")[0] : "" }}
+            {{ item.deadline ? new Date(item.deadline).toLocaleString() : "" }}
           </template>
           <template v-slot:[`item.happeningTime`]="{ item }">
-            {{ item.happeningTime ? item.happeningTime.split("T")[0] : "" }} at
             {{
               item.happeningTime
-                ? item.happeningTime.split("T")[1].split(".")[0]
+                ? new Date(item.happeningTime).toLocaleString()
                 : ""
             }}
           </template>
@@ -280,9 +287,8 @@
             {{ getEscalationPolicy(item.escalationPolicy) }}
           </template>
           <template v-slot:[`item.createdAt`]="{ item }">
-            {{ item.createdAt ? item.createdAt.split("T")[0] : "" }} at
             {{
-              item.createdAt ? item.createdAt.split("T")[1].split(".")[0] : ""
+              item.createdAt ? new Date(item.createdAt).toLocaleString() : ""
             }}
           </template>
         </v-data-table>
@@ -369,7 +375,6 @@ export default {
       return user.name;
     });
     this.getAllIncidents();
-    this.getAllFacility();
     this.getAllSuppliers();
     this.userNameById();
   },
@@ -382,7 +387,6 @@ export default {
       "getAllImpactedIssues",
       "getInventories",
       "getAllSuppliers",
-      "getAllFacility",
       "getUsers",
       "getIncidentByResponderToMe",
     ]),
@@ -392,17 +396,25 @@ export default {
           text: "Subject",
           align: "start",
           value: "subject",
+          // class: "teal white--text title pt-3 pb-3",
+          width: "91px",
         },
-        { text: "Linked issue", value: "impactedIssues" },
-        { text: creatorHeader, value: "creatorId" },
-        { text: "Happening time", value: "happeningTime" },
-        { text: "creation time", value: "createdAt" },
-        { text: "priority", value: "priority" },
-        { text: "state", value: "state" },
-        { text: "Deadline", value: "deadline" },
+        { text: "Linked issue", value: "impactedIssues", width: "130px" },
+        {
+          text: creatorHeader,
+          value: "creatorId",
+          class: "pa-4 mt-4",
+          width: "100px",
+          align: "start",
+        },
+        { text: "Incident Time", value: "happeningTime", width: "166px" },
+        { text: "creation time", value: "createdAt", width: "166px" },
+        { text: "priority", value: "priority", width: "91px" },
+        { text: "state", value: "state", width: "91px" },
+        { text: "Deadline", value: "deadline", width: "146px" },
         // { text: "category", value: "category" },
-        { text: "Update duration", value: "escalationPolicy" },
-        { text: responderHeader, value: "responderId" },
+        { text: "Update duration", value: "escalationPolicy", width: "146px" },
+        { text: responderHeader, value: "responderId", width: "94px" },
         { text: "", value: "icon" },
       ];
     },

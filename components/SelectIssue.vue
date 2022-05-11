@@ -67,11 +67,10 @@ export default {
       }
       this.selectedImpactedIssueId = id;
       const itemsLists = {
-        Facilities: this.allFacilities,
         Suppliers: this.allSuppliers,
         "Inventory item": this.allInventories,
         "Consumer profile": this.allUsers,
-        Appointment: this.allSuppliers,
+        Rooms: this.allSuppliers,
         "Users profiles": this.allUsers,
       };
       this.itemList = itemsLists[name] || [];

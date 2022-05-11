@@ -101,21 +101,18 @@ export default {
       if (!this.comment.trim()) {
         return (this.commentError = "This field is required");
       }
-      const newReplay = await this.$axios.post(
-        `/comments/comments/addReplay`,
-        {
-          comment_id: this.comment_id,
-          user_id: this.userId,
-          user_name: this.userName,
-          comment: this.comment,
-        }
-      );
+      const newReplay = await this.$axios.post(`/comments/comments/addReplay`, {
+        comment_id: this.comment_id,
+        user_id: this.userId,
+        user_name: this.userName,
+        comment: this.comment,
+      });
       if (newReplay.status === 201) {
         this.$emit("newReplay", newReplay.data);
         this.comment = "";
         this.addReplay = false;
         this.showReplays = true;
-        this.editArray = [...this.editArray , false]
+        this.editArray = [...this.editArray, false];
         setTimeout(() => {
           var container = this.$el.querySelector(".container");
           container.scroll({ top: container.scrollHeight, behavior: "smooth" });

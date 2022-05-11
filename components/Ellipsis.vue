@@ -93,12 +93,22 @@
         >
           <v-list-item-title>Add comment</v-list-item-title>
         </v-list-item>
-        <v-list-item>
-          <v-list-item-title>update escalation duration</v-list-item-title>
+        <v-list-item
+          @click.stop="
+            (showText = true),
+              (state = 'In Progress'),
+              ($refs.menu.isActive = false)
+          "
+        >
+          <v-list-item-title>In progress</v-list-item-title>
         </v-list-item>
         <v-list-item>
           <v-list-item-title
-            @click.stop="(showText = true), (state = 'On Hold')"
+            @click.stop="
+              (showText = true),
+                (state = 'On Hold'),
+                ($refs.menu.isActive = false)
+            "
             >On hold</v-list-item-title
           >
           <StateAction
@@ -111,12 +121,21 @@
         </v-list-item>
         <v-list-item>
           <v-list-item-title
-            @click.stop="(showText = true), (state = 'Resolved')"
+            @click.stop="
+              (showText = true),
+                (state = 'Resolved'),
+                ($refs.menu.isActive = false)
+            "
             >Resolved (corrective)</v-list-item-title
           >
         </v-list-item>
         <v-list-item>
-          <v-list-item-title @click.stop="(showText = true), (state = 'Closed')"
+          <v-list-item-title
+            @click.stop="
+              (showText = true),
+                (state = 'Closed'),
+                ($refs.menu.isActive = false)
+            "
             >Closed (preventive)</v-list-item-title
           >
         </v-list-item>

@@ -58,16 +58,7 @@ const actions = {
       console.log(err);
     }
   },
-  async getAllFacility({ commit }) {
-    try {
-      const facilities = await this.$axios.$get(
-        "/facility-management/Facilities"
-      );
-      commit("setFacilities", facilities);
-    } catch (err) {
-      console.log(err);
-    }
-  },
+
   async getAllSuppliers({ commit }) {
     try {
       const suppliers = await this.$axios.$get(

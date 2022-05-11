@@ -8,7 +8,22 @@
       overlay-opacity="0.90"
       max-width="600px"
     >
-      <v-card>
+      <v-card v-if="state == 'Closed' && !stateResolved.length">
+        <div class="pa-6">
+          please update incident state to Resolved and write incident resolve
+        </div>
+        <div class="d-flex justify-end">
+          <v-btn
+            color="primary"
+            class="text-capitalize mr-6"
+            text
+            @click="cancel"
+          >
+            cancel
+          </v-btn>
+        </div>
+      </v-card>
+      <v-card v-else>
         <v-list-item-title class="pa-4">
           why do you want to update state to {{ state }}
         </v-list-item-title>
@@ -45,7 +60,7 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 export default {
   props: {
     dialogState: {
@@ -71,9 +86,20 @@ export default {
       actionPreventive: "",
     };
   },
-  mounted() {},
+  mounted() {
+    this.getAllState(this.incidentId);
+    this.getStateResolved(this.incidentId);
+  },
+  computed: {
+    ...mapGetters(["incidentStateies", "stateResolved"]),
+  },
   methods: {
-    ...mapActions(["updateIncidentState", "addState"]),
+    ...mapActions([
+      "updateIncidentState",
+      "addState",
+      "getAllState",
+      "getStateResolved",
+    ]),
     async updateState() {
       console.log(this.$refs.form.validate());
       if (!this.actionText) {

@@ -35,18 +35,15 @@
               color="rgb(117 117 117)"
               class="line"
             ></v-progress-linear>
-            <v-row class="d-flex justify-space-around pa-2">
+            <v-row
+              v-if="incidentDetails.happeningTime"
+              class="d-flex justify-space-around pa-2"
+            >
               <v-col><h4>Incident Time</h4></v-col>
               <v-col>
                 {{
                   incidentDetails.happeningTime
-                    ? incidentDetails.happeningTime.split("T")[0]
-                    : ""
-                }}
-                at
-                {{
-                  incidentDetails.happeningTime
-                    ? incidentDetails.happeningTime.split("T")[1].split(".")[0]
+                    ? new Date(incidentDetails.happeningTime).toLocaleString()
                     : ""
                 }}</v-col
               >
@@ -148,16 +145,33 @@
               <v-col>
                 {{
                   incidentDetails.createdAt
-                    ? incidentDetails.createdAt.split("T")[0]
-                    : ""
-                }}
-                at
-                {{
-                  incidentDetails.createdAt
-                    ? incidentDetails.createdAt.split("T")[1].split(".")[0]
+                    ? new Date(incidentDetails.createdAt).toLocaleString()
                     : ""
                 }}</v-col
               >
+            </v-row>
+            <v-progress-linear
+              height="1"
+              value="200"
+              color="rgb(117 117 117)"
+              class="line"
+            ></v-progress-linear>
+            <v-row class="d-flex justify-space-around pa-2">
+              <v-col><h4>State</h4></v-col>
+              <v-col>
+                <v-tooltip right>
+                  <template v-slot:activator="{ on, attrs }">
+                    <div v-bind="attrs" v-on="on" @click="showText = true">
+                      {{ incidentDetails.state }}
+                    </div>
+                  </template>
+
+                  <span>show text</span>
+                </v-tooltip>
+              </v-col>
+            </v-row>
+            <v-row v-if="showText">
+              <v-col>ddddddddddddddd</v-col>
             </v-row>
             <v-progress-linear
               height="1"
@@ -170,13 +184,7 @@
               <v-col>
                 {{
                   incidentDetails.deadline
-                    ? incidentDetails.deadline.split("T")[0]
-                    : ""
-                }}
-                at
-                {{
-                  incidentDetails.deadline
-                    ? incidentDetails.deadline.split("T")[1].split(".")[0]
+                    ? new Date(incidentDetails.deadline).toLocaleString()
                     : ""
                 }}</v-col
               >
@@ -385,10 +393,13 @@
                   >
                     <v-list-item-title>
                       {{ i + 1 }} - {{ impactedIssue.name }} -
-                      {{
-                        impactedIssue.IncidentImpactedIssue.item
-                      }}</v-list-item-title
-                    >
+                      {{ impactedIssue.IncidentImpactedIssue.item }}
+                      <!-- <a
+                        class="ml-16"
+                        href="https://web.tasks.agentsoncloud.com/"
+                        >Linked</a
+                      > -->
+                    </v-list-item-title>
                   </v-list-item>
                 </v-list>
                 <v-card v-else>
@@ -403,8 +414,10 @@
           </div>
           <div class="task">
             <v-checkbox
+              v-model="incidentDetails.sendToAssignee"
               background-color="#f9f9f9"
               label="to be as a task sent to assignee"
+              disabled
             ></v-checkbox>
           </div>
         </div>
@@ -521,7 +534,9 @@
                 <div>
                   <h4>Next update:</h4>
                 </div>
-                <div class="pl-4">after 12:90 M</div>
+                <div class="pl-4">
+                  {{ nextUpdate }}
+                </div>
               </div>
             </div>
             <v-container>
@@ -546,7 +561,7 @@
                     {{ update.updateText }}
                   </v-col>
                   <v-col class="Happened">
-                    {{ update.createdAt.replace("T", " ").split(".")[0] }}
+                    {{ new Date(update.createdAt).toLocaleString() }}
                   </v-col>
                   <v-col>
                     <v-icon @click="updateIncidentUpdateForm = true">
@@ -644,6 +659,9 @@ export default {
       showMoreImpact: false,
       assigneeDialog: false,
       reporterDialog: false,
+      task: null,
+      showText: false,
+      nextUpdate: "",
     };
   },
   computed: {
@@ -660,6 +678,7 @@ export default {
   },
 
   async mounted() {
+    console.log("detailes----------------------");
     this.userId = +localStorage.getItem("userId");
     console.log("incidentId--detailest---", this.incidentId);
     await this.getUsers();
@@ -680,7 +699,11 @@ export default {
       : (this.title = "Reporter:");
     this.commentIncident = this.incidentDetails.id.toString();
     console.log(this.activeBtn, "activeBtnactiveBtn");
-    this.nextUpdate();
+    const oneMin = 1000 * 60;
+    this.nextUpdateFun();
+    this.updateInterval = setInterval(() => {
+      this.nextUpdateFun();
+    }, oneMin);
   },
   methods: {
     ...mapActions([
@@ -763,6 +786,8 @@ export default {
     },
     close() {
       this.$emit("update:dialogDetails", false);
+      console.log("this.updateInterval", this.updateInterval);
+      clearInterval(this.updateInterval);
     },
     deleteUpdateFun(id) {
       this.deleteUpdate(id);
@@ -781,11 +806,32 @@ export default {
         incidentId: this.incidentDetails.id,
       });
     },
-    nextUpdate() {
-      let timeNow = new Date();
-      // let arrayTime = timeNow.split("");
-      // console.log(timeNow, arrayTime, "dddddddddddddddd");
-      // const myTimeout = setTimeout(myGreeting, 60000);
+    nextUpdateFun() {
+      const { escalationPolicy } = this.incidentDetails;
+      if (!escalationPolicy) {
+        this.nextUpdate = "No escalation";
+      }
+      const { createdAt } = this.incidentUpdates[0];
+      const [hours, minuets] = escalationPolicy.split(":");
+      const totalMin = Number(hours) * 60 + Number(minuets);
+      const now = new Date().getTime() / 1000;
+      const createTime = new Date(createdAt).getTime() / 1000;
+
+      const diff = now - createTime;
+      const min = Math.round(diff / 60);
+
+      const nextUpdateTime = totalMin - min;
+
+      if (nextUpdateTime > 0 && nextUpdateTime < 60) {
+        this.nextUpdate = `After ${nextUpdateTime} minutes`;
+      } else if (nextUpdateTime > 60) {
+        this.nextUpdate = `After ${Math.floor(nextUpdateTime / 60)} hours and ${
+          nextUpdateTime % 60
+        } minutes`;
+      } else if (nextUpdateTime === 0) {
+        this.nextUpdate = "Now";
+      }
+      this.nextUpdate = `Before ${Math.abs(nextUpdateTime)}`;
     },
   },
 };

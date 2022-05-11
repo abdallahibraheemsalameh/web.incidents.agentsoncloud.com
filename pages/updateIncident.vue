@@ -534,7 +534,7 @@ export default {
       assignee: [],
       responder: [],
       deadline: "",
-      task: true,
+      task: null,
       state: "",
       impactOperational: true,
       selectedImpactedIssueId: null,
@@ -625,11 +625,11 @@ export default {
     this.impactOperational = this.incidentDetails.impactOperational;
     this.escalationPolicy = this.incidentDetails.escalationPolicy;
     this.secondaryAssignee = this.incidentDetails.secondaryAssignee;
+    this.task = this.incidentDetails.sendToAssignee;
     this.userId = localStorage.getItem("userId");
     await this.$store.dispatch("getUsers");
     this.getAllImpactedIssues();
     // this.getAllIncidents();
-    this.getAllFacility();
     this.getInventories();
     this.getAllSuppliers();
   },
@@ -663,7 +663,6 @@ export default {
     ...mapActions([
       "getInventories",
       "getAllSuppliers",
-      "getAllFacility",
       "getAllImpactedIssues",
       "getUsers",
       "getIncidentsDetails",
@@ -702,6 +701,7 @@ export default {
         escalationPolicy: this.escalationPolicy,
         impactFinancial: this.impactFinancial,
         impactOperational: this.impactOperational,
+        sendToAssignee: this.task,
         impactedIssues: this.selectedImpactedIssueId
           ? [{ id: this.selectedImpactedIssueId, item: this.itemName }]
           : [],
