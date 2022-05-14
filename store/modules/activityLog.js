@@ -14,6 +14,7 @@ const Activity = {
         const activityLog = await this.$axios.$get(
           `/incident-management/activityLog/${incidentId}`
         );
+        console.log(activityLog, "vvactivityLog");
         commit("newActivityLog", activityLog);
       } catch (err) {
         console.log(err);

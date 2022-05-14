@@ -13,10 +13,12 @@
           <div>Incident Full Details</div>
         </v-card-title>
         <div class="d-flex justify-space-around">
-          <v-card width="320">
+          <v-card width="350">
             <v-row class="d-flex justify-space-around pa-2">
-              <v-col color="red"><h4>Subject</h4></v-col>
-              <v-col>{{ incidentDetails.subject }}</v-col>
+              <div class="pa-4">
+                <h5>Subject</h5>
+              </div>
+              <v-col col="9">{{ incidentDetails.subject }}</v-col>
             </v-row>
 
             <v-progress-linear
@@ -26,7 +28,9 @@
               class="line"
             ></v-progress-linear>
             <v-row class="d-flex justify-space-around pa-2">
-              <v-col><h4>Type</h4></v-col>
+              <div class="pa-4">
+                <h5>Type</h5>
+              </div>
               <v-col>{{ incidentDetails.type }}</v-col>
             </v-row>
             <v-progress-linear
@@ -39,7 +43,7 @@
               v-if="incidentDetails.happeningTime"
               class="d-flex justify-space-around pa-2"
             >
-              <v-col><h4>Incident Time</h4></v-col>
+              <div class="pa-4"><h5>Incident Time</h5></div>
               <v-col>
                 {{
                   incidentDetails.happeningTime
@@ -56,31 +60,49 @@
             ></v-progress-linear>
 
             <v-row class="d-flex justify-space-around pa-2">
-              <!-- {{ activeBtn }} -->
               <v-row
                 class="pa-3"
                 v-if="activeBtn === 'reporter' || activeBtn === 'assignee'"
               >
-                <v-col><h4>Creator</h4></v-col>
+                <div class="pa-4"><h5>Creator</h5></div>
                 <v-col>{{ allUsersNameById[userId] }}</v-col>
               </v-row>
+
               <v-row class="pa-3" v-if="activeBtn === 'createdByMe'">
-                <v-col><h4>Assignee</h4></v-col>
-                <v-col>
-                  <v-icon
-                    @click.stop="
-                      (incidentId = incidentDetails.id), (assigneeDialog = true)
-                    "
-                    >mdi-eye-outline
-                  </v-icon></v-col
+                <div class="pa-4"><h5>Assignee</h5></div>
+                <div
+                  v-if="
+                    incidentDetails.assignees &&
+                    incidentDetails.assignees.length == 1
+                  "
                 >
-                <ShowUser
-                  v-if="incidentId == incidentDetails.id && assigneeDialog"
-                  :dialogIcone.sync="assigneeDialog"
-                  :users="incidentDetails.assignees"
-                  :userDialogTitle="'Assignees'"
-                  :activeBtn="activeBtn"
-                />
+                  <v-col>
+                    {{ incidentDetails.assignees[0].name }}
+                  </v-col>
+                </div>
+                <div
+                  v-if="
+                    incidentDetails.assignees &&
+                    incidentDetails.assignees.length > 1
+                  "
+                >
+                  <v-col>
+                    <v-icon
+                      @click.stop="
+                        (incidentId = incidentDetails.id),
+                          (assigneeDialog = true)
+                      "
+                      >mdi-eye-outline
+                    </v-icon>
+                  </v-col>
+                  <ShowUser
+                    v-if="incidentId == incidentDetails.id && assigneeDialog"
+                    :dialogIcone.sync="assigneeDialog"
+                    :users="incidentDetails.assignees"
+                    :userDialogTitle="'Assignees'"
+                    :activeBtn="activeBtn"
+                  />
+                </div>
               </v-row>
             </v-row>
             <v-progress-linear
@@ -89,59 +111,71 @@
               color="rgb(117 117 117)"
               class="line"
             ></v-progress-linear>
-            <v-row class="d-flex justify-space-around pa-2">
-              <v-row
-                class="pa-3"
-                v-if="activeBtn === 'createdByMe' || activeBtn === 'assignee'"
-              >
-                <v-col><h4>Reporter</h4></v-col>
-                <v-col>
-                  <v-icon
-                    @click.stop="
-                      (incidentId = incidentDetails.id), (reporterDialog = true)
-                    "
-                    >mdi-eye-outline
-                  </v-icon></v-col
-                >
-                <!-- {{ incidentDetails }}nnn -->
-                <ShowUser
-                  v-if="incidentId == incidentDetails.id && reporterDialog"
-                  :dialogIcone.sync="reporterDialog"
-                  :users="incidentDetails.responders"
-                  :userDialogTitle="'Reporters'"
-                  :activeBtn="activeBtn"
-                />
-              </v-row>
-              <v-row class="pa-3" v-if="activeBtn === 'reporter'">
-                <v-col><h4>Assignee</h4></v-col>
-                <v-col>
-                  <v-icon
-                    @click.stop="
-                      (incidentId = incidentDetails.id), (dialogIcone = true)
-                    "
-                    >mdi-eye-outline
-                  </v-icon></v-col
-                >
+            <div
+              v-if="
+                handleShowUsers(
+                  incidentDetails.assignees,
+                  incidentDetails.responders,
+                  activeBtn
+                ) !== 'Show icon'
+              "
+            >
+              <v-row class="pa-2">
+                <div class="pa-4">
+                  <h5>
+                    {{ activeBtn !== "reporter" ? "Reporter:" : "Assignee:" }}
+                  </h5>
+                </div>
 
-                <ShowUser
-                  v-if="incidentId == incidentDetails.id"
-                  :dialogIcone.sync="dialogIcone"
-                  :users="incidentDetails.assignees"
-                  :userDialogTitle="'Assignees'"
-                  :activeBtn="activeBtn"
-                />
+                <v-col
+                  >{{
+                    handleShowUsers(
+                      incidentDetails.assignees,
+                      incidentDetails.responders,
+                      activeBtn
+                    )
+                  }}
+                </v-col>
               </v-row>
+            </div>
+            <v-row v-else class="pa-2">
+              <div class="pa-4">
+                <h5>
+                  {{ activeBtn !== "reporter" ? "Reporter:" : "Assignee:" }}
+                </h5>
+              </div>
+              <v-col>
+                <v-icon
+                  @click.stop="
+                    (incidentId = incidentDetails.id), (dialogIcone = true)
+                  "
+                  >mdi-eye-outline
+                </v-icon>
+              </v-col>
+
+              <ShowUser
+                v-if="incidentId == incidentDetails.id && dialogIcone"
+                :dialogIcone.sync="dialogIcone"
+                :users="
+                  activeBtn === 'reporter'
+                    ? incidentDetails.assignees
+                    : incidentDetails.responders
+                "
+                :userDialogTitle="
+                  activeBtn === 'reporter' ? 'Assignees' : 'Reporters'
+                "
+                :activeBtn="activeBtn"
+              />
             </v-row>
+
             <v-progress-linear
               height="1"
               value="100"
               color="rgb(117 117 117)"
               class="line"
             ></v-progress-linear>
-          </v-card>
-          <v-card width="320">
             <v-row class="d-flex justify-space-around pa-2">
-              <v-col><h4>Creation Time</h4></v-col>
+              <div class="pa-4"><h5>Creation Time</h5></div>
               <v-col>
                 {{
                   incidentDetails.createdAt
@@ -157,30 +191,7 @@
               class="line"
             ></v-progress-linear>
             <v-row class="d-flex justify-space-around pa-2">
-              <v-col><h4>State</h4></v-col>
-              <v-col>
-                <v-tooltip right>
-                  <template v-slot:activator="{ on, attrs }">
-                    <div v-bind="attrs" v-on="on" @click="showText = true">
-                      {{ incidentDetails.state }}
-                    </div>
-                  </template>
-
-                  <span>show text</span>
-                </v-tooltip>
-              </v-col>
-            </v-row>
-            <v-row v-if="showText">
-              <v-col>ddddddddddddddd</v-col>
-            </v-row>
-            <v-progress-linear
-              height="1"
-              value="200"
-              color="rgb(117 117 117)"
-              class="line"
-            ></v-progress-linear>
-            <v-row class="d-flex justify-space-around pa-2">
-              <v-col><h4>Deadline</h4></v-col>
+              <div class="pa-4"><h5>Deadline</h5></div>
               <v-col>
                 {{
                   incidentDetails.deadline
@@ -195,81 +206,175 @@
               color="rgb(117 117 117)"
               class="line"
             ></v-progress-linear>
+          </v-card>
+          <v-card width="350">
             <v-row class="d-flex justify-space-around pa-2">
-              <v-col><h4>Severity level</h4></v-col>
-              <v-col>{{ incidentDetails.severityLevel }}</v-col>
-            </v-row>
-            <v-progress-linear
-              height="1"
-              value="100"
-              color="rgb(117 117 117)"
-              class="line"
-            ></v-progress-linear>
-            <v-row class="d-flex justify-space-around pa-2">
-              <v-col><h4>Impact level</h4></v-col>
-              <v-col>{{ incidentDetails.severityLevel }}</v-col>
-            </v-row>
-            <v-progress-linear
-              height="1"
-              value="100"
-              color="rgb(117 117 117)"
-              class="line"
-            ></v-progress-linear>
-            <v-row
-              class="d-flex justify-space-around pa-2"
-              v-if="
-                incidentDetails.severityDescription &&
-                incidentDetails.severityDescription.length <= 10
-              "
-            >
-              <v-col><h4>Severity description</h4></v-col>
-              <v-col>{{ incidentDetails.severityDescription }}</v-col>
-            </v-row>
-            <v-row
-              class="d-flex justify-space-around pa-2"
-              v-if="
-                incidentDetails.severityDescription &&
-                incidentDetails.severityDescription.length > 10
-              "
-            >
-              <v-col><h4>Severity description</h4></v-col>
+              <div class="pa-4"><h5>State</h5></div>
               <v-col>
-                {{ incidentDetails.severityDescription.substr(0, 4) }}...
+                <!-- <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <div v-bind="attrs" v-on="on" @click="showText = !showText"> -->
+                {{ incidentDetails.state }}
+                <!-- </div>
+                  </template>
+
+                  <span>Show text state</span> -->
+                <!-- </v-tooltip> -->
               </v-col>
-              <v-icon class="mr-5" @click="showMoreSeverity = !showMoreSeverity"
+            </v-row>
+
+            <v-progress-linear
+              height="1"
+              value="200"
+              color="rgb(117 117 117)"
+              class="line"
+            ></v-progress-linear>
+            <v-row class="d-flex justify-space-between pa-2">
+              <div class="pa-1"><h5>on hold reason</h5></div>
+              <v-icon class="mr-5" @click="showReason = !showReason"
                 >mdi-chevron-down</v-icon
               >
             </v-row>
-            <v-col v-if="showMoreSeverity">
-              {{
-                incidentDetails.impactDescription.replace(
-                  incidentDetails.impactDescription.substr(0, 4),
-                  ""
-                )
-              }}
-            </v-col>
-          </v-card>
-          <v-card width="320">
-            <v-row
-              class="d-flex justify-space-around pa-2"
-              v-if="
-                incidentDetails.impactDescription &&
-                incidentDetails.impactDescription.length <= 10
-              "
-            >
-              <v-col><h4>Impact description</h4></v-col>
-              <v-col>{{ incidentDetails.impactDescription }}</v-col>
+            <v-row v-if="showReason">
+              <v-col v-for="(state, i) in onHoldReason" :key="state.id">
+                {{ i + 1 }} - {{ state.actionText }}
+              </v-col>
             </v-row>
-            <v-row
-              class="d-flex justify-space-around pa-2"
-              v-if="
-                incidentDetails.impactDescription &&
-                incidentDetails.impactDescription.length > 10
-              "
-            >
-              <v-col><h4>Impact description</h4></v-col>
-              <v-col>
-                {{ incidentDetails.impactDescription.substr(0, 4) }}...
+
+            <v-progress-linear
+              height="1"
+              value="200"
+              color="rgb(117 117 117)"
+              class="mr-12"
+            ></v-progress-linear>
+            <v-row class="d-flex justify-space-between pa-2">
+              <div class="pa-1"><h5>Corrective action</h5></div>
+              <v-icon class="mr-5" @click="showCorrective = !showCorrective"
+                >mdi-chevron-down</v-icon
+              >
+            </v-row>
+            <v-row class="pa-2" v-if="showCorrective">
+              <v-col v-for="(state, i) in correctiveAction" :key="state.id">
+                {{ i + 1 }} - {{ state.actionText }}
+              </v-col>
+            </v-row>
+
+            <v-progress-linear
+              height="1"
+              value="200"
+              color="rgb(117 117 117)"
+              class="line"
+            ></v-progress-linear>
+            <v-row class="d-flex justify-space-between pa-2">
+              <div class="pa-1"><h5>Preventive action</h5></div>
+              <v-icon class="mr-5" @click="showReventive = !showReventive"
+                >mdi-chevron-down</v-icon
+              >
+            </v-row>
+            <!-- <v-row v-if="showReventive">
+              <v-col v-for="(state, i) in preventiveAction" :key="state.id">
+                {{ i + 1 }} - {{ state.actionText }}
+              </v-col>
+            </v-row> -->
+            <v-progress-linear
+              height="1"
+              value="200"
+              color="rgb(117 117 117)"
+              class="line"
+            ></v-progress-linear>
+
+            <v-row class="d-flex justify-space-around pa-2">
+              <div class="pa-4"><h5>Severity level</h5></div>
+              <v-col>{{ incidentDetails.severityLevel }}</v-col>
+            </v-row>
+            <v-progress-linear
+              height="1"
+              value="100"
+              color="rgb(117 117 117)"
+              class="line"
+            ></v-progress-linear>
+            <v-row class="d-flex justify-space-around pa-2">
+              <div class="pa-4"><h5>Impact level</h5></div>
+              <v-col>{{ incidentDetails.severityLevel }}</v-col>
+            </v-row>
+            <v-progress-linear
+              height="1"
+              value="100"
+              color="rgb(117 117 117)"
+              class="line"
+            ></v-progress-linear>
+
+            <v-row class="d-flex justify-space-around pa-2">
+              <div class="pa-4"><h5>Update duration</h5></div>
+              <v-col>{{ incidentDetails.escalationPolicy }}</v-col>
+            </v-row>
+            <v-progress-linear
+              height="1"
+              value="200"
+              color="rgb(117 117 117)"
+              class="line"
+            ></v-progress-linear>
+          </v-card>
+
+          <v-card width="350">
+            <v-row class="d-flex pa-2">
+              <div class="pa-4"><h5>Severity description</h5></div>
+              <v-col
+                v-if="
+                  incidentDetails.severityDescription &&
+                  incidentDetails.severityDescription.length <= 10
+                "
+                >{{ incidentDetails.severityDescription }}</v-col
+              >
+            </v-row>
+            <v-row class="d-flex justify-space-around pa-2">
+              <v-col
+                class="ml-1 mt-0"
+                v-if="
+                  incidentDetails.severityDescription &&
+                  incidentDetails.severityDescription.length > 10 &&
+                  !showMoreSeverity
+                "
+              >
+                {{ incidentDetails.severityDescription.substr(0, 10) }}...
+              </v-col>
+              <!-- <v-icon class="mr-5" @click="showMoreSeverity = !showMoreSeverity"
+                >mdi-chevron-down</v-icon
+              > -->
+              <v-row class="d-flex justify-end pa-6">
+                <v-icon @click="showMoreSeverity = !showMoreSeverity"
+                  >mdi-chevron-down</v-icon
+                >
+              </v-row>
+            </v-row>
+            <v-col v-if="showMoreSeverity">
+              {{ incidentDetails.impactDescription }} </v-col
+            ><!--
+            <v-progress-linear
+              height="1"
+              value="200"
+              color="rgb(117 117 117)"
+              class="line"
+            ></v-progress-linear>
+            <v-row class="d-flex justify-space-around pa-2">
+              <div class="pa-4"><h5>Impact description</h5></div>
+              <v-col
+                v-if="
+                  incidentDetails.impactDescription &&
+                  incidentDetails.impactDescription.length <= 10
+                "
+                >{{ incidentDetails.impactDescription }}</v-col
+              >
+            </v-row>
+            <v-row class="d-flex justify-space-around pa-2">
+              <div class="pa-4"><h5>Impact description</h5></div>
+              <v-col
+                v-if="
+                  incidentDetails.impactDescription &&
+                  incidentDetails.impactDescription.length > 10
+                "
+              >
+                {{ incidentDetails.impactDescription.substr(0, 10) }}...
               </v-col>
               <v-icon class="mr-5" @click="showMoreImpact = !showMoreImpact"
                 >mdi-chevron-down</v-icon
@@ -279,76 +384,53 @@
             <v-col v-if="showMoreImpact">
               {{
                 incidentDetails.impactDescription.replace(
-                  incidentDetails.impactDescription.substr(0, 4),
+                  incidentDetails.impactDescription.substr(0, 10),
                   ""
                 )
               }}
             </v-col>
-
-            <v-progress-linear
+-->
+            <!-- <v-progress-linear
               height="1"
               value="200"
               color="rgb(117 117 117)"
               class="line"
             ></v-progress-linear>
 
-            <v-row class="d-flex justify-space-around pa-2">
-              <v-col><h4>Update duration</h4></v-col>
-              <v-col>{{ incidentDetails.escalationPolicy }}</v-col>
-            </v-row>
-            <v-progress-linear
-              height="1"
-              value="200"
-              color="rgb(117 117 117)"
-              class="line"
-            ></v-progress-linear>
-            <!-- Escalation status or next update???????? -->
-            <!-- <v-row class="d-flex justify-space-around pa-2">
-              <v-col><h4>Escalation status</h4></v-col>
-              <v-col>{{ incidentDetails.escalationPolicy }}</v-col>
-            </v-row>
-            <v-progress-linear
-              height="1"
-              value="200"
-              color="rgb(117 117 117)"
-              class="line"
-            ></v-progress-linear> -->
             <v-row
               class="d-flex justify-space-around pa-2"
-              v-if="
-                incidentDetails.description &&
-                incidentDetails.description.length <= 4
-              "
+              v-if="incidentDetails.description.length <= 4"
             >
-              <!-- <div > -->
-              <v-col><h4>Description</h4></v-col>
+              <div class="pa-4"><h5>Description</h5></div>
               <v-col>
                 {{ incidentDetails.description }}
               </v-col>
             </v-row>
-            <!-- </div> -->
+
             <v-row
-              class="d-flex justify-space-around pa-2"
-              v-if="
-                incidentDetails.description &&
-                incidentDetails.description.length > 4
-              "
+              class="d-flex pa-2"
+              v-if="incidentDetails.description.length > 10"
             >
-              <v-col><h4>Description</h4></v-col>
-              <v-col> {{ incidentDetails.description.substr(0, 4) }}... </v-col>
-              <v-icon class="mr-5" @click="showMore = !showMore"
-                >mdi-chevron-down</v-icon
-              >
+              <div class="pa-4"><h5>Description</h5></div>
+              <div class="pl-4">
+                {{ incidentDetails.description.substr(0, 10) }}...
+                {{ incidentDetails.description }}
+              </div>
+              <v-row class="d-flex justify-end pa-2 mr-2 mb-2">
+                <v-icon class="ml-15" @click="showMore = !showMore"
+                  >mdi-chevron-down</v-icon
+                >
+              </v-row>
             </v-row>
 
             <v-col v-if="showMore">
               {{
                 incidentDetails.description.replace(
-                  incidentDetails.description.substr(0, 4),
+                  incidentDetails.description.substr(0, 10),
                   ""
                 )
               }}
-            </v-col>
+            </v-col> -->
 
             <v-progress-linear
               height="1"
@@ -393,12 +475,10 @@
                   >
                     <v-list-item-title>
                       {{ i + 1 }} - {{ impactedIssue.name }} -
-                      {{ impactedIssue.IncidentImpactedIssue.item }}
-                      <!-- <a
-                        class="ml-16"
-                        href="https://web.tasks.agentsoncloud.com/"
-                        >Linked</a
-                      > -->
+                      <a href="">
+                        <!-- linled issue from anas -->
+                        {{ impactedIssue.IncidentImpactedIssue.item }}</a
+                      >
                     </v-list-item-title>
                   </v-list-item>
                 </v-list>
@@ -511,7 +591,7 @@
                 </v-col>
                 <v-col class="d-flex mr-12">
                   <div>
-                    <h4>Next update:</h4>
+                    <h5>Next update:</h5>
                   </div>
                   <div class="pl-4">after 12:90 M</div>
                 </v-col>
@@ -532,7 +612,7 @@
               </div>
               <div class="d-flex mr-16">
                 <div>
-                  <h4>Next update:</h4>
+                  <h5>Next update:</h5>
                 </div>
                 <div class="pl-4">
                   {{ nextUpdate }}
@@ -609,8 +689,9 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-
+import mixins from "../helpers/mixins.js";
 export default {
+  mixins: [mixins],
   props: {
     dialogDetails: {
       type: Boolean,
@@ -662,6 +743,12 @@ export default {
       task: null,
       showText: false,
       nextUpdate: "",
+      onHoldReason: [],
+      correctiveAction: [],
+      preventiveAction: [],
+      showReason: false,
+      showCorrective: false,
+      showReventive: false,
     };
   },
   computed: {
@@ -674,10 +761,12 @@ export default {
       "allUsers",
       "commentUpdated",
       "incidentUpdates",
+      "incidentStateies",
     ]),
   },
 
   async mounted() {
+    await this.getAllStateByIncidentId(this.incidentId);
     console.log("detailes----------------------");
     this.userId = +localStorage.getItem("userId");
     console.log("incidentId--detailest---", this.incidentId);
@@ -697,13 +786,32 @@ export default {
     this.activeBtn === "reporter"
       ? (this.title = "Assignee:")
       : (this.title = "Reporter:");
-    this.commentIncident = this.incidentDetails.id.toString();
+    // this.commentIncident = this.incidentDetails.id.toString();
     console.log(this.activeBtn, "activeBtnactiveBtn");
     const oneMin = 1000 * 60;
     this.nextUpdateFun();
     this.updateInterval = setInterval(() => {
       this.nextUpdateFun();
     }, oneMin);
+    console.log(
+      this.incidentStateies,
+      "this.incidentUpdatesthis.incidentUpdates"
+    );
+    this.onHoldReason = this.incidentStateies.filter((update) => {
+      return update.state == "On Hold";
+    });
+    this.correctiveAction = this.incidentStateies.filter((update) => {
+      return update.state == "Resolved";
+    });
+    this.preventiveAction = this.incidentStateies.filter((update) => {
+      return update.state == "Closed";
+    });
+    console.log(
+      // this.onHoldReason,
+      // this.correctiveAction,
+      this.preventiveAction,
+      "this.onHoldReason"
+    );
   },
   methods: {
     ...mapActions([
@@ -721,6 +829,7 @@ export default {
       "deleteUpdate",
       "updateTextComment",
       "updateTextUpdate",
+      "getAllStateByIncidentId",
     ]),
     // async addComment() {
     //   console.log("-------------------------create----------------");
@@ -811,6 +920,10 @@ export default {
       if (!escalationPolicy) {
         this.nextUpdate = "No escalation";
       }
+      if (this.incidentUpdates.length == 0) {
+        return;
+      }
+      console.log(this.incidentUpdates, "createdAtcreatedAt");
       const { createdAt } = this.incidentUpdates[0];
       const [hours, minuets] = escalationPolicy.split(":");
       const totalMin = Number(hours) * 60 + Number(minuets);
@@ -883,7 +996,7 @@ export default {
 .v-input.theme--light.v-input--selection-controls.v-input--checkbox {
   margin: 0;
 }
-h4 {
+h5 {
   color: rgb(24 103 192);
 }
 .textFieldUpdate {

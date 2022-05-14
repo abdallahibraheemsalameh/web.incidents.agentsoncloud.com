@@ -106,21 +106,28 @@ export default {
     showAddCommentToggle: false,
     editArray: [],
   }),
-  // computed: {
-  //   ...mapGetters(["incidentDetails"]),
-  // },
-  mounted() {
+  computed: {
+    // ...mapGetters(["comments"]),
+  },
+  async mounted() {
     console.log("show");
   },
   methods: {
-    ...mapActions(["createComment", "getIncidentsDetails"]),
+    ...mapActions(["createComment", "getIncidentsDetails", "getComments"]),
+
     async getTaskComments() {
-      const res = await this.$axios.get(`/comments/comments/task/${this.id}`);
-      this.comments = res.data;
-      this.editArray = this.comments.map((ele) => {
-        return false;
-      });
+      await this.getComments({ incidentId: this.id });
+      console.log("tttttttt", this.comments);
+      // this.allComments = this.comments;
     },
+
+    // async getTaskComments() {
+    //   const res = await this.$axios.get(`/comments/comments/task/${this.id}`);
+    //   this.comments = res.data;
+    //   this.editArray = this.comments.map((ele) => {
+    //     return false;
+    //   });
+    // },
     createNewComment() {
       console.log(
         this.id,

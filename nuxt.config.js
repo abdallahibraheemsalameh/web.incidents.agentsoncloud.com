@@ -60,6 +60,10 @@ export default {
       target: "http://localhost:30222",
       pathRewrite: { "^/incident-management/": "" },
     },
+    "/api-geteway/": {
+      target: "https://api.development.agentsoncloud.com/external",
+      pathRewrite: { "^/api-geteway/": "" },
+    },
     "/user-management/": {
       target: "https://62270c622dfa52401812e5c0.mockapi.io",
       pathRewrite: { "^/user-management/": "" },

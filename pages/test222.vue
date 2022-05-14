@@ -1,26 +1,32 @@
 <template>
-  <div class="text-center d-flex align-center justify-space-around">
-    <v-tooltip bottom>
-      <template v-slot:activator="{ on, attrs }">
-        <div color="primary" dark v-bind="attrs" v-on="on">Button</div>
-      </template>
-      <span>Tooltip</span>
-    </v-tooltip>
-
-    <v-tooltip bottom>
-      <template v-slot:activator="{ on, attrs }">
-        <v-icon color="primary" dark v-bind="attrs" v-on="on">
-          mdi-home
-        </v-icon>
-      </template>
-      <span>Tooltip</span>
-    </v-tooltip>
-
-    <v-tooltip bottom>
-      <template v-slot:activator="{ on, attrs }">
-        <span v-bind="attrs" v-on="on">This text has a tooltip</span>
-      </template>
-      <span>Tooltip</span>
-    </v-tooltip>
-  </div>
+  <v-card flat class="py-12">
+    <v-card-text>
+      <div @click="active = true" :color="color1">
+        <p v-bind:class="{ class1: active == true }">goood</p>
+      </div>
+      <v-btn v-bind:class="{ class2: active == false }" :color="color2"
+        >baad</v-btn
+      >
+      <v-btn color="indigo accent-2">baad</v-btn>
+    </v-card-text>
+  </v-card>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      active: false,
+    };
+  },
+};
+</script>
+<style>
+.class1 {
+  color: "red";
+  /* "rgb(204, 202, 202)"; */
+}
+.class2 {
+  color: "#89d5d2";
+}
+</style>

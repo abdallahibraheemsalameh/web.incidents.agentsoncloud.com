@@ -87,7 +87,7 @@ export default {
     };
   },
   mounted() {
-    this.getAllState(this.incidentId);
+    this.getAllStateByIncidentId(this.incidentId);
     this.getStateResolved(this.incidentId);
   },
   computed: {
@@ -97,7 +97,7 @@ export default {
     ...mapActions([
       "updateIncidentState",
       "addState",
-      "getAllState",
+      "getAllStateByIncidentId",
       "getStateResolved",
     ]),
     async updateState() {

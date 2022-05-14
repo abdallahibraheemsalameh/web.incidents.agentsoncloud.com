@@ -27,7 +27,7 @@ const actions = {
       console.log(err);
     }
   },
-  async getAllState({ commit }, id) {
+  async getAllStateByIncidentId({ commit }, id) {
     try {
       const allState = await this.$axios.$get(
         `/incident-management/state/allState/${id}`

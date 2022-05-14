@@ -15,13 +15,24 @@
       </template>
       <v-container>
         <v-row>
-          <div class="headerCard d-flex justify-space-around">
-            <div class="titleCards pa-2">Incident</div>
+          <div class="headerCard d-flex justify-space-between">
+            <div class="titleCards ml-5 mt-3">Incident</div>
 
-            <v-icon large class="" color="#009688" @click="goToIncidentPage">
+            <v-icon
+              class="mr-8 mt-3"
+              large
+              color="#009688"
+              @click="goToIncidentPage"
+            >
               mdi-open-in-new
             </v-icon>
           </div>
+          <v-progress-linear
+            height="1"
+            value="200"
+            color="rgb(117 117 117)"
+            class="lineCard"
+          ></v-progress-linear>
         </v-row>
         <v-row>
           <!-- <v-col>
@@ -43,40 +54,41 @@
               >
               </v-autocomplete>
             </v-col> -->
-          <v-col>
-            <v-autocomplete
-              cols="12"
-              md="3"
-              v-model="valueFilter"
-              :items="subjectsIncident"
-              cache-items
-              class="filterSearch"
-              flat
-              hide-no-data
-              hide-details
-              placeholder="Subject"
-              @change="filterIncidents('subject', valueFilter)"
-            >
-            </v-autocomplete>
-          </v-col>
+          <div class="ml-3 d-flex justify-space-between">
+            <v-col>
+              <v-autocomplete
+                cols="12"
+                md="3"
+                v-model="valueFilter"
+                :items="subjectsIncident"
+                cache-items
+                class="filterSearch"
+                flat
+                hide-no-data
+                hide-details
+                placeholder="Subject"
+                @change="filterIncidents('subject', valueFilter)"
+              >
+              </v-autocomplete>
+            </v-col>
 
-          <v-col>
-            <v-autocomplete
-              cols="12"
-              md="3"
-              v-model="valueFilter"
-              :items="priorityFilter"
-              cache-items
-              class="filterSearch"
-              flat
-              hide-no-data
-              hide-details
-              placeholder="Priority"
-              @change="filterIncidents('priority', valueFilter)"
-            >
-            </v-autocomplete>
-          </v-col>
-          <!-- <v-col>
+            <v-col>
+              <v-autocomplete
+                cols="12"
+                md="3"
+                v-model="valueFilter"
+                :items="priorityFilter"
+                cache-items
+                class="filterSearch"
+                flat
+                hide-no-data
+                hide-details
+                placeholder="Priority"
+                @change="filterIncidents('priority', valueFilter)"
+              >
+              </v-autocomplete>
+            </v-col>
+            <!-- <v-col>
               <v-autocomplete
                 cols="12"
                 md="3"
@@ -94,11 +106,16 @@
               </v-autocomplete>
             </v-col> -->
 
-          <v-col>
-            <v-btn class="text-capitalize mt-4" @click="clearFilter"
-              >Clear</v-btn
-            >
-          </v-col>
+            <v-col>
+              <v-btn
+                class="clearFilter text-capitalize mt-4"
+                @click="clearFilter"
+                :outlined="true"
+                color="#009688"
+                >Clear</v-btn
+              >
+            </v-col>
+          </div>
         </v-row>
       </v-container>
       <div>
@@ -108,8 +125,54 @@
           @getIncidents="getIncidents"
         />
       </div>
-
+      <!-- update -->
       <div>
+        <v-row justify="space-between">
+          <div class="ml-8 mt-4">
+            <v-btn
+              :outlined="activeBtn === 'assignee'"
+              color="#89d5d2"
+              elevation="2"
+              :plain="activeBtn !== 'assignee'"
+              @click="assignedToMe"
+              :text="false"
+              class="textBtu text-capitalize"
+            >
+              Assigned to me</v-btn
+            >
+            <v-btn
+              :outlined="activeBtn === 'createdByMe'"
+              color="#89d5d2"
+              elevation="2"
+              :plain="activeBtn !== 'createdByMe'"
+              @click="getIncidentCreatedByMe"
+              class="text-capitalize"
+            >
+              Created by me</v-btn
+            >
+            <v-btn
+              :outlined="activeBtn === 'reporter'"
+              color="#89d5d2"
+              elevation="2"
+              :plain="activeBtn !== 'reporter'"
+              @click="getIncidentResponder"
+              class="textBtu text-capitalize"
+            >
+              reporting on</v-btn
+            >
+
+            <v-icon
+              color="rgb(0 150 136)"
+              large
+              class="ml-16"
+              @click.stop="showCreateForm = true"
+              >mdi-plus-circle</v-icon
+            >
+          </div>
+        </v-row>
+      </div>
+
+      <!-- <div>
         <v-row justify="space-between">
           <div class="ml-8 mt-4">
             <v-btn
@@ -143,16 +206,17 @@
             >
               reporting on</v-btn
             >
-            <v-btn
-              color="#272727"
-              class="pa-4 ml-16 text-capitalize white--text"
+
+            <v-icon
+              color="rgb(0 150 136)"
+              large
+              class="ml-16"
               @click.stop="showCreateForm = true"
-            >
-              Create</v-btn
+              >mdi-plus-circle</v-icon
             >
           </div>
         </v-row>
-      </div>
+      </div> -->
 
       <div v-if="!showIncidents.length">
         <v-card height="50" class="grey--text pt-3 d-flex justify-center"
@@ -167,29 +231,36 @@
                 <v-row>
                   <v-col cols="5" style="height: 25px">
                     <v-card-text style="height: 25px">
-                      <!-- <div v-if="activeBtn === 'assignee'">
-                        Creator :{{ allUsersNameById[incident.creatorId] }}
-                      </div> -->
                       <div v-if="activeBtn === 'createdByMe'">
-                        <!-- Assignee :<ShowAssignees
-                          :assignees="incident.assignees"
-                        /> -->
-
-                        Assignees:
-                        <v-icon
-                          @click.stop="
-                            (incidentId = incident.id), (assigneeDialog = true)
+                        <div
+                          v-if="
+                            incident.assignees && incident.assignees.length == 1
                           "
-                          >mdi-eye-outline
-                        </v-icon>
+                        >
+                          Assignees: {{ incident.assignees[0].name }}
+                        </div>
+                        <div
+                          v-if="
+                            incident.assignees && incident.assignees.length > 1
+                          "
+                        >
+                          Assignees:
+                          <v-icon
+                            @click.stop="
+                              (incidentId = incident.id),
+                                (assigneeDialog = true)
+                            "
+                            >mdi-eye-outline
+                          </v-icon>
 
-                        <ShowUser
-                          v-if="incidentId == incident.id && assigneeDialog"
-                          :dialogIcone.sync="assigneeDialog"
-                          :users="incident.assignees"
-                          :userDialogTitle="'Assignees'"
-                          :activeBtn="activeBtn"
-                        />
+                          <ShowUser
+                            v-if="incidentId == incident.id && assigneeDialog"
+                            :dialogIcone.sync="assigneeDialog"
+                            :users="incident.assignees"
+                            :userDialogTitle="'Assignees'"
+                            :activeBtn="activeBtn"
+                          />
+                        </div>
                       </div>
                       <div v-else>
                         Creator :{{ allUsersNameById[incident.creatorId] }}
@@ -218,10 +289,25 @@
                     <v-card-text style="height: 25px">
                       <div
                         v-if="
-                          activeBtn === 'createdByMe' ||
-                          activeBtn === 'assignee'
+                          handleShowUsers(
+                            incident.assignees,
+                            incident.responders,
+                            activeBtn
+                          ) !== 'Show icon'
                         "
                       >
+                        {{
+                          activeBtn !== "reporter" ? "Reporter:" : "Assignee:"
+                        }}
+                        {{
+                          handleShowUsers(
+                            incident.assignees,
+                            incident.responders,
+                            activeBtn
+                          )
+                        }}
+                      </div>
+                      <div v-else-if="activeBtn !== 'reporter'">
                         Reporters:
                         <v-icon
                           @click.stop="
@@ -237,7 +323,7 @@
                           :activeBtn="activeBtn"
                         />
                       </div>
-                      <div v-if="activeBtn === 'reporter'">
+                      <div v-else-if="activeBtn === 'reporter'">
                         Assignees:
                         <v-icon
                           @click.stop="
@@ -257,9 +343,6 @@
                     </v-card-text>
                   </v-col>
                   <v-col cols="6">
-                    <!-- <v-card-text style="height: 25px">
-                  Activity status :
-                </v-card-text> -->
                     <v-card-text style="height: 25px"
                       >State :{{ incident.state }}
                     </v-card-text>
@@ -297,8 +380,10 @@
 </template>
 
 <script>
+import mixins from "../helpers/mixins.js";
 import { mapGetters, mapActions } from "vuex";
 export default {
+  mixins: [mixins],
   data() {
     return {
       showDetailsIncident: false,
@@ -335,6 +420,7 @@ export default {
       message: "",
       reporterDialog: false,
       assigneeDialog: false,
+      color: "red",
     };
   },
   computed: {
@@ -488,5 +574,17 @@ export default {
 .rowCards {
   border: solid 2px #3daea3;
   height: 100%;
+}
+
+.v-icon.v-icon::after {
+  background-color: transparent !important;
+}
+.clearFilter {
+  margin-left: 96px;
+}
+.lineCard {
+  width: 93%;
+  margin-left: 15px;
+  margin-top: 15px;
 }
 </style>

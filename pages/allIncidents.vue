@@ -199,13 +199,15 @@
           <template v-slot:[`item.responderId`]="{ item }">
             <div
               v-if="
-                activeBtn === 'assignee' ||
-                (activeBtn === 'createdByMe' && !item.responders)
+                handleShowUsers(item.assignees, item.responders, activeBtn) !==
+                'Show icon'
               "
             >
-              No reporter
+              {{ handleShowUsers(item.assignees, item.responders, activeBtn) }}
             </div>
-            <v-icon @click.stop="(incidentId = item.id), (dialogIcone = true)"
+            <v-icon
+              v-else
+              @click.stop="(incidentId = item.id), (dialogIcone = true)"
               >mdi-eye-outline
             </v-icon>
 
@@ -249,17 +251,22 @@
           </template>
           <template v-slot:[`item.creatorId`]="{ item }">
             <div v-if="activeBtn === 'createdByMe'">
-              <v-icon
-                @click.stop="(incidentId = item.id), (assigneeDialog = true)"
-                >mdi-eye-outline
-              </v-icon>
-              <ShowUser
-                v-if="incidentId == item.id && assigneeDialog"
-                :dialogIcone.sync="assigneeDialog"
-                :users="item.assignees"
-                :userDialogTitle="'Assignees'"
-                :activeBtn="activeBtn"
-              />
+              <div v-if="item.assignees && item.assignees.length == 1">
+                {{ item.assignees[0].name }}
+              </div>
+              <div v-if="item.assignees && item.assignees.length > 1">
+                <v-icon
+                  @click.stop="(incidentId = item.id), (assigneeDialog = true)"
+                  >mdi-eye-outline
+                </v-icon>
+                <ShowUser
+                  v-if="incidentId == item.id && assigneeDialog"
+                  :dialogIcone.sync="assigneeDialog"
+                  :users="item.assignees"
+                  :userDialogTitle="'Assignees'"
+                  :activeBtn="activeBtn"
+                />
+              </div>
             </div>
 
             <div v-if="activeBtn !== 'createdByMe'">
@@ -298,8 +305,10 @@
 </template>
 
 <script>
+import mixins from "../helpers/mixins.js";
 import { mapGetters, mapActions } from "vuex";
 export default {
+  mixins: [mixins],
   data() {
     return {
       buttonName: "",
@@ -396,18 +405,24 @@ export default {
           text: "Subject",
           align: "start",
           value: "subject",
-          // class: "teal white--text title pt-3 pb-3",
+          // class: "lavender",
+
           width: "91px",
         },
         { text: "Linked issue", value: "impactedIssues", width: "130px" },
         {
           text: creatorHeader,
           value: "creatorId",
-          class: "pa-4 mt-4",
+          class: "azure pa-4 mt-4",
           width: "100px",
           align: "start",
         },
-        { text: "Incident Time", value: "happeningTime", width: "166px" },
+        {
+          text: "Incident Time",
+          value: "happeningTime",
+          width: "166px",
+          // class: "grey",
+        },
         { text: "creation time", value: "createdAt", width: "166px" },
         { text: "priority", value: "priority", width: "91px" },
         { text: "state", value: "state", width: "91px" },
@@ -548,4 +563,13 @@ export default {
 h4.header {
   color: black;
 }
+/* .theme--light.v-data-table
+  > .v-data-table__wrapper
+  > table
+  > thead
+  > tr:last-child
+  > th {
+  border-bottom: thin solid rgba(0, 0, 0, 0.12);
+  background-color: aliceblue;
+} */
 </style>

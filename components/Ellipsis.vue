@@ -95,9 +95,9 @@
         </v-list-item>
         <v-list-item
           @click.stop="
-            (showText = true),
-              (state = 'In Progress'),
-              ($refs.menu.isActive = false)
+            (showText = false),
+              ($refs.menu.isActive = false),
+              updateStateInProgress()
           "
         >
           <v-list-item-title>In progress</v-list-item-title>
@@ -185,6 +185,14 @@ export default {
     },
     close() {
       this.showDialogComment = false;
+    },
+    updateStateInProgress() {
+      console.log(this.itemProps.id, "this.itemProps.idthis.itemProps.id");
+      this.updateIncidentState({
+        id: this.itemProps.id,
+        state: "In Progress",
+      });
+      this.$emit("getIncidents");
     },
   },
 };

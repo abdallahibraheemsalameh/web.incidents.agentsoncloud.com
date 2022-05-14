@@ -1,90 +1,58 @@
 <template>
   <v-container>
-    <div v-for="log in activityLog" :key="log.id">
-      <v-card class="pa-4 mx-6">
+    <div v-for="log in activityLog" :key="log.id" class="d-flex justify-center">
+      <v-card width="800" class="cardLog pa-4 mx-6">
         <div
           class="pa-4"
-          v-for="(value, index) in Object.entries(log.oldValue)"
-          :key="index"
+          v-for="[key, value] in Object.entries(log.oldValue)"
+          :key="key"
         >
-          {{ value }}
-          <v-row v-if="value[0] !== 'updatedAt'">
-            <v-col
-              ><div>{{ userName }} Change</div>
-            </v-col>
-            <v-col>{{ value[0] }}</v-col>
-            <v-col v-if="value[0] == 'deadline' || value[0] == 'happeningTime'"
-              >{{ value[1] ? value[1].split("T")[0] : "" }} At
-              {{ value[1] ? value[1].split("T")[1].split(".")[0] : "" }}</v-col
-            >
-            <v-col v-else>{{ value[1] }}</v-col>
-            <v-col>
-              <v-icon large color="#2684ff" size="400">
-                mdi-arrow-right-bold</v-icon
-              ></v-col
-            >
-            <v-col v-if="value[0] == 'deadline' || value[0] == 'happeningTime'">
-              <!-- {{ value[1] ? value[1].split("T")[0] : "" }} At
-              {{ value[1] ? value[1].split("T")[1].split(".")[0] : "" }} -->
-              <div
-                v-for="(value, index) in Object.entries(log.newValue)"
-                :key="index"
-              >
-                <v-col> {{ value }}{{ log.newValue }} </v-col>
+          <v-row>
+            <!-- <v-col> -->
+            <v-avatar>
+              <img
+                src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png"
+                alt="John"
+              />
+            </v-avatar>
+            <div class="pa-4">{{ userName }} updated</div>
+            <div class="pa-4">{{ key }}</div>
+            <div class="pa-4">on</div>
+
+            <!-- </v-col> -->
+            <!-- <v-col
+              ><div>{{ userName }} updated</div>
+            </v-col> -->
+            <!-- <v-col>{{ key }}</v-col> -->
+            <!-- <v-col>on</v-col> -->
+            <!-- <v-col> -->
+            <div class="Happened pa-4">
+              {{ formatData(log.createdAt) }}
+            </div>
+            <!-- </v-col> -->
+          </v-row>
+          <v-row>
+            <div class="d-flex">
+              <div class="pa-4">
+                {{ formatData(value) }}
               </div>
 
-              <!-- "" -->
-            </v-col>
-            <v-col v-else>{{ value[1] }} </v-col>
-            <v-col>
-              Happened on
-              <div class="Happened">
-                {{ log.createdAt ? log.createdAt.split("T")[0] : "" }} At
-                {{
-                  log.createdAt ? log.createdAt.split("T")[1].split(".")[0] : ""
-                }}
-              </div>
-            </v-col>
-          </v-row>
+              <!-- <v-col class="mr-12"> -->
+              <v-icon color="#2684ff" size="20"> mdi-arrow-right-bold</v-icon>
+              <!-- </v-col> -->
+
+              <div class="pa-4">{{ formatData(log.newValue[key]) }}</div>
+            </div></v-row
+          >
+          <v-progress-linear
+            height="1"
+            value="100"
+            color="rgb(117 117 117)"
+            class="progress-linear py-4"
+          ></v-progress-linear>
         </div>
       </v-card>
     </div>
-
-    <!-- <v-data-table
-      :headers="headers"
-      :items="activityLog"
-      :search="search"
-      show-expand
-      single-expand
-    >
-      <template v-slot:[`item.oldValue`]="{ item }">
-        <div
-          v-for="(value, index) in Object.entries(item.oldValue)"
-          :key="index"
-        >
-          {{ value[1] }}
-        </div>
-      </template>
-      <template v-slot:[`item.record`]="{ item }">
-        <div
-          v-for="(value, index) in Object.entries(item.oldValue)"
-          :key="index"
-        >
-          {{ value[0] }}
-        </div>
-      </template>
-      <template v-slot:[`item.newValue`]="{ item }">
-        <div
-          v-for="(value, index) in Object.entries(item.newValue)"
-          :key="index"
-        >
-          {{ value[1] }}
-        </div>
-      </template>
-      <template v-slot:[`item.userId`]>
-        {{ allUsersNameById[userId] }}
-      </template>
-    </v-data-table> -->
   </v-container>
 </template>
 <script>
@@ -124,6 +92,18 @@ export default {
     close() {
       this.$emit("update:dialog", false);
     },
+    isValidDate(date) {
+      if (!isNaN(date)) {
+        return false;
+      }
+      return new Date(date) !== "Invalid Date" && !isNaN(new Date(date));
+    },
+    formatData(data) {
+      if (this.isValidDate(data)) {
+        return new Date(data).toLocaleString();
+      }
+      return data;
+    },
   },
 };
 </script>
@@ -131,5 +111,8 @@ export default {
 <style>
 .Happened {
   color: #2684ff;
+}
+.cardLog {
+  font-family: "Roboto";
 }
 </style>

@@ -109,17 +109,14 @@
                       </div>
                     </div>
                   </div>
-                  <v-text-field
+
+                  <v-textarea
                     v-model="description"
-                    name="input-7-1"
                     :rules="descriptionRules"
-                    height="70"
-                    background-color="#ffffff"
                     label="Description"
-                    required
-                  ></v-text-field>
+                  ></v-textarea>
                   <div class="impact">
-                    <v-text-field
+                    <!-- <v-text-field
                       background="rgb(145 145 145)"
                       name="input-7-1"
                       v-model="impactDescription"
@@ -128,7 +125,12 @@
                       rows="2"
                       :rules="impactRules"
                       label="Impact description"
-                    ></v-text-field>
+                    ></v-text-field> -->
+                    <v-textarea
+                      v-model="impactDescription"
+                      :rules="impactRules"
+                      label="Impact description"
+                    ></v-textarea>
                     <div class="d-flex flex-row mb-2">
                       <template>
                         <v-chip
@@ -170,7 +172,7 @@
                 </v-col>
                 <v-col cols="9" sm="6" md="6">
                   <div class="impact">
-                    <v-text-field
+                    <!-- <v-text-field
                       background="rgb(145 145 145)"
                       name="input-7-1"
                       v-model="severityDescription"
@@ -179,7 +181,12 @@
                       rows="2"
                       :rules="severityRules"
                       label="Severity description"
-                    ></v-text-field>
+                    ></v-text-field> -->
+                    <v-textarea
+                      v-model="severityDescription"
+                      :rules="impactRules"
+                      label="Impact description"
+                    ></v-textarea>
                     <div class="d-flex flex-row mb-2">
                       <template>
                         <v-chip
@@ -457,7 +464,7 @@
                     label=" Escalation duration   hh:mm"
                     dense
                     value=""
-                    :maxlength="2"
+                    :maxlength="5"
                   ></v-text-field>
                   <div class="attachments">
                     <p class="addAttachments">add attachments</p>

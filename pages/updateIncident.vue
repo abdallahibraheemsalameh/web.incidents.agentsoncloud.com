@@ -597,7 +597,6 @@ export default {
     this.assigneeIds();
     this.responderIds();
 
-    console.log("incidentDetails", this.incidentDetails);
     console.log(this.incidentDetails.deadline, "dedddddddddddd");
     this.subject = this.incidentDetails.subject;
     this.impactFinancial = this.incidentDetails.impactFinancial;
@@ -609,10 +608,10 @@ export default {
     this.ReasonCreation = this.incidentDetails.reasonForCreation;
     this.type = this.incidentDetails.type;
     this.time = this.incidentDetails.deadline
-      ? this.incidentDetails.deadline.split("T")[1].split(".")[0]
+      ? new Date(this.incidentDetails.deadline).toLocaleTimeString()
       : null;
     this.date = this.incidentDetails.deadline
-      ? this.incidentDetails.deadline.split("T")[0]
+      ? new Date(this.incidentDetails.deadline).toLocaleDateString()
       : null;
     // ?????
     this.incidentHappeningTime = this.incidentDetails.happeningTime
@@ -708,13 +707,11 @@ export default {
         assignee: this.assignee,
         responder: this.responder,
       };
-      console.log(data, "data");
 
       this.updateIncidentById({ id: this.incidentId, body: data });
 
       if (this.files.length) {
         const formData = new FormData();
-        console.log(file, file.name, "llllllllllllllllllllllllll");
         for (let file of this.files) {
           formData.append("files", file, file.name);
         }
